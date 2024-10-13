@@ -1,0 +1,54 @@
+# Core dependencies
+ollama
+chromadb
+langchain
+pydantic
+
+# PyTorch for tensor operations and potential GPU acceleration
+torch
+
+# File processing
+python-magic
+beautifulsoup4
+Pillow
+
+# Web framework for API
+Flask
+
+# Frontend
+streamlit
+
+# Utility libraries
+requests
+tqdm
+
+# Document processing
+PyPDF2
+python-docx
+markdown
+
+# Testing
+pytest
+
+# Type checking
+mypy
+
+# Code formatting
+black
+
+# Linting
+flake8
+
+# Logging
+loguru
+
+# Translation
+translations
+
+# Data visualization
+wordcloud
+matplotlib
+
+# Language detection
+langdetect
+
