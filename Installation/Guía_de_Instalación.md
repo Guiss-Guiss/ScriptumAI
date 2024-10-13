@@ -98,6 +98,10 @@ python -m venv scriptum
 ```bash
 pip install -r requirements.txt
 ```
+En MacOs :
+```bash
+brew install libmagic
+```
 
 ## 6. Ejecutar ScriptumAI
 
