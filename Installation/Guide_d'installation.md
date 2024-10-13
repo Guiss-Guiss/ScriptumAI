@@ -80,11 +80,12 @@ cd ScriptumAI
 
 ```bash
 python -m venv scriptum
+```
 
 3. Activez l'environnement virtuel :
 
 - Sur Windows :
-  ```
+  ```bash
   scriptum\Scripts\activate
   ```
 - Sur macOS et Linux :
@@ -96,6 +97,11 @@ python -m venv scriptum
 
 ```bash
 pip install -r requirements.txt
+```
+pour Mac :
+
+```bash
+brew install libmagic
 ```
 
 ## 6. Lancer ScriptumAI
