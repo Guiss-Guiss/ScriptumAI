@@ -20,7 +20,7 @@ def fetch_health_status():
         return {"status": "unhealthy", "database": "disconnected", "error": str(e)}
 
 def render_system_health(lang: str):
-    logger.info("Rendering system health component")
+    logger.info(f"Rendering system health component with language: {lang}")
     st.subheader(get_text("system_health", lang))
 
     health_status = fetch_health_status()
@@ -28,10 +28,12 @@ def render_system_health(lang: str):
     col1, col2 = st.columns(2)
 
     with col1:
-        st.metric(get_text("overall_status", lang), health_status['status'].capitalize())
+        status_text = get_text(health_status['status'].lower(), lang)
+        st.metric(get_text("overall_status", lang), status_text)
 
     with col2:
-        st.metric(get_text("database_connectivity", lang), health_status['database'].capitalize())
+        db_status_text = get_text(health_status['database'].lower(), lang)
+        st.metric(get_text("database_connectivity", lang), db_status_text)
 
     if health_status['status'] == 'unhealthy':
         st.error(get_text("error", lang).format(health_status.get('error', 'Unknown error')))
@@ -40,4 +42,3 @@ def render_system_health(lang: str):
 
     if st.button(get_text("refresh_health_status", lang)):
         st.rerun()
-
