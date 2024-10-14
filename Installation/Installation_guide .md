@@ -35,7 +35,7 @@ If you have a compatible NVIDIA GPU and want to use it for accelerated processin
 
 ## 3. Install Ollama
 
-### For macOS and Linux:
+### For MacOS and Linux:
 
 ```bash
 curl https://ollama.ai/install.sh | sh
@@ -88,7 +88,7 @@ python -m venv scriptum
   ```
   scriptum\Scripts\activate
   ```
-- On macOS and Linux:
+- On MacOS and Linux:
   ```
   source scriptum/bin/activate
   ```
