@@ -35,7 +35,7 @@ Si vous avez un GPU NVIDIA compatible et que vous souhaitez l'utiliser pour un t
 
 ## 3. Installer Ollama
 
-### Pour macOS et Linux :
+### Pour MacOS et Linux :
 
 ```bash
 curl https://ollama.ai/install.sh | sh
@@ -88,7 +88,7 @@ python -m venv scriptum
   ```bash
   scriptum\Scripts\activate
   ```
-- Sur macOS et Linux :
+- Sur MacOS et Linux :
   ```
   source scriptum/bin/activate
   ```
