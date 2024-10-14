@@ -98,7 +98,7 @@ python -m venv scriptum
 ```bash
 pip install -r requirements.txt
 ```
-- Pour MacOs :
+- En plus pour MacOs :
 
 ```bash
 brew install libmagic
