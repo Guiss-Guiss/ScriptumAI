@@ -1,8 +1,10 @@
 import torch
+import torch.multiprocessing as mp
 from typing import List, Dict, Any
 from loguru import logger
 from backend.utils import initialize_chroma_client
 import langdetect
+from functools import partial
 
 from config import (
     TOP_K_RESULTS,
@@ -37,27 +39,16 @@ class RetrievalComponent:
         except:
             return SUPPORTED_LANGUAGES[0]
 
-    def find_similar_chunks(self, query: str, k: int = 5) -> List[Dict[str, Any]]:
+    def find_similar_chunks(self, query: str, k: int = TOP_K_RESULTS) -> List[Dict[str, Any]]:
         try:
             query_embedding = self.embedding_component.embed_query(query)
             query_lang = self._detect_language(query)
 
-            all_results = []
-            for lang, collection in self.collections.items():
-                results = collection.query(
-                    query_embeddings=[query_embedding.tolist()],
-                    n_results=k,
-                    include=["metadatas", "documents", "distances"]
-                )
-                for i in range(len(results['ids'][0])):
-                    all_results.append({
-                        'chunk_id': results['ids'][0][i],
-                        'chunk': results['documents'][0][i],
-                        'metadata': results['metadatas'][0][i],
-                        'similarity_score': 1 - results['distances'][0][i],
-                        'language': lang
-                    })
+            with mp.Pool(processes=mp.cpu_count()) as pool:
+                all_results = pool.map(partial(self._search_collection, query_embedding=query_embedding.tolist(), k=k), 
+                                       self.collections.items())
 
+            all_results = [item for sublist in all_results for item in sublist]
             all_results.sort(key=lambda x: x['similarity_score'], reverse=True)
 
             prioritized_results = [r for r in all_results if r['language'] == query_lang] + \
@@ -69,60 +60,66 @@ class RetrievalComponent:
             logger.error(f"Error finding similar chunks: {str(e)}", exc_info=True)
             return []
 
+    def _search_collection(self, collection_item, query_embedding, k):
+        lang, collection = collection_item
+        try:
+            results = collection.query(
+                query_embeddings=[query_embedding],
+                n_results=k,
+                include=["metadatas", "documents", "distances"]
+            )
+            return [
+                {
+                    'chunk_id': results['ids'][0][i],
+                    'chunk': results['documents'][0][i],
+                    'metadata': results['metadatas'][0][i],
+                    'similarity_score': 1 - results['distances'][0][i],
+                    'language': lang
+                }
+                for i in range(len(results['ids'][0]))
+            ]
+        except Exception as e:
+            logger.error(f"Error searching collection {lang}: {str(e)}")
+            return []
+
     @torch.no_grad()
-    def retrieve(self, query: str, k: int = 5) -> List[Dict[str, Any]]:
+    def retrieve(self, query: str, k: int = TOP_K_RESULTS) -> List[Dict[str, Any]]:
         return self.find_similar_chunks(query, k)
 
     def batch_retrieve(self, queries: List[str], k: int = TOP_K_RESULTS) -> List[List[Dict[str, Any]]]:
         logger.info(f"Batch retrieving top {k} results for {len(queries)} queries")
         query_embeddings = self.embedding_component.embed_documents(queries)
         
-        batch_retrieved_chunks = []
-        for i, query in enumerate(queries):
-            query_lang = self._detect_language(query)
-            all_results = []
-            
-            for lang, collection in self.collections.items():
-                results = collection.query(
-                    query_embeddings=[query_embeddings[i].cpu().numpy().tolist()],
-                    n_results=k,
-                    include=["documents", "metadatas", "distances"]
-                )
-                for j in range(len(results['ids'][0])):
-                    all_results.append({
-                        "chunk_id": results['ids'][0][j],
-                        "chunk": results['documents'][0][j],
-                        "metadata": results['metadatas'][0][j],
-                        "similarity_score": 1 - results['distances'][0][j],
-                        "language": lang
-                    })
-            
-            all_results.sort(key=lambda x: x['similarity_score'], reverse=True)
-            prioritized_results = [r for r in all_results if r['language'] == query_lang] + \
-                                  [r for r in all_results if r['language'] != query_lang]
-            
-            batch_retrieved_chunks.append(prioritized_results[:k])
+        with mp.Pool(processes=mp.cpu_count()) as pool:
+            batch_retrieved_chunks = pool.map(partial(self.find_similar_chunks, k=k), queries)
 
         return batch_retrieved_chunks
 
     def retrieve_by_id(self, chunk_ids: List[str]) -> List[Dict[str, Any]]:
         logger.info(f"Retrieving {len(chunk_ids)} chunks by ID")
 
-        retrieved_chunks = []
-        for lang, collection in self.collections.items():
-            results = collection.get(
-                ids=chunk_ids,
-                include=["documents", "metadatas"]
-            )
-            for i in range(len(results['ids'])):
-                retrieved_chunks.append({
-                    "chunk_id": results['ids'][i],
-                    "chunk": results['documents'][i],
-                    "metadata": results['metadatas'][i],
-                    "language": lang
-                })
+        with mp.Pool(processes=mp.cpu_count()) as pool:
+            retrieved_chunks = pool.map(self._retrieve_single_chunk, chunk_ids)
 
-        return retrieved_chunks
+        return [chunk for chunk in retrieved_chunks if chunk is not None]
+
+    def _retrieve_single_chunk(self, chunk_id: str) -> Dict[str, Any]:
+        for lang, collection in self.collections.items():
+            try:
+                results = collection.get(
+                    ids=[chunk_id],
+                    include=["documents", "metadatas"]
+                )
+                if results['ids']:
+                    return {
+                        "chunk_id": results['ids'][0],
+                        "chunk": results['documents'][0],
+                        "metadata": results['metadatas'][0],
+                        "language": lang
+                    }
+            except Exception as e:
+                logger.error(f"Error retrieving chunk {chunk_id} from collection {lang}: {str(e)}")
+        return None
 
     def get_collection_stats(self) -> Dict[str, int]:
         try:
@@ -134,4 +131,3 @@ class RetrievalComponent:
         except Exception as e:
             logger.error(f"Failed to get collection stats: {e}", exc_info=True)
             raise
-

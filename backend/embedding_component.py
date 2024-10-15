@@ -1,5 +1,6 @@
 import ollama
 import torch
+import torch.multiprocessing as mp
 from typing import List, Union
 from config import OLLAMA_BASE_URL, EMBEDDING_MODEL, BATCH_SIZE, EMBEDDING_DEVICE
 from loguru import logger
@@ -15,31 +16,32 @@ class EmbeddingComponent:
         if isinstance(texts, str):
             texts = [texts]
 
-        all_embeddings = []
-        for text in texts:
-            try:
-                logger.debug(f"Sending request to Ollama API for text: {text[:50]}...")
-                logger.debug(f"Using model: {self.model}")
-                logger.debug(f"Ollama base URL: {OLLAMA_BASE_URL}")
+        with mp.Pool(processes=mp.cpu_count()) as pool:
+            embeddings = pool.map(self._get_single_embedding, texts)
 
-                response = self.client.embeddings(model=self.model, prompt=text)
-                logger.debug(f"Raw API response: {response}")
+        return torch.tensor(embeddings, device=self.device)
 
-                if not isinstance(response, dict):
-                    logger.error(f"Unexpected response type: {type(response)}")
-                    raise TypeError(f"Expected dict, got {type(response)}")
+    def _get_single_embedding(self, text: str) -> List[float]:
+        try:
+            logger.debug(f"Sending request to Ollama API for text: {text[:50]}...")
+            logger.debug(f"Using model: {self.model}")
+            logger.debug(f"Ollama base URL: {OLLAMA_BASE_URL}")
 
-                if 'embedding' not in response:
-                    logger.error(f"'embedding' key not found in response. Keys present: {list(response.keys())}")
-                    raise KeyError("'embedding' key not found in API response")
+            response = self.client.embeddings(model=self.model, prompt=text)
+            logger.debug(f"Raw API response: {response}")
 
-                embedding = response['embedding']
-                all_embeddings.append(embedding)
-            except Exception as e:
-                logger.error(f"Error getting embedding for text: {str(e)}", exc_info=True)
-                raise
+            if not isinstance(response, dict):
+                logger.error(f"Unexpected response type: {type(response)}")
+                raise TypeError(f"Expected dict, got {type(response)}")
 
-        return torch.tensor(all_embeddings, device=self.device)
+            if 'embedding' not in response:
+                logger.error(f"'embedding' key not found in response. Keys present: {list(response.keys())}")
+                raise KeyError("'embedding' key not found in API response")
+
+            return response['embedding']
+        except Exception as e:
+            logger.error(f"Error getting embedding for text: {str(e)}", exc_info=True)
+            raise
 
     def embed_documents(self, documents: List[str]) -> torch.Tensor:
         logger.info(f"Embedding {len(documents)} documents")
@@ -51,32 +53,14 @@ class EmbeddingComponent:
 
     @staticmethod
     def cosine_similarity(a: torch.Tensor, b: torch.Tensor) -> torch.Tensor:
-        """
-        Compute cosine similarity between two tensors.
-
-        Args:
-            a (torch.Tensor): First tensor
-            b (torch.Tensor): Second tensor
-
-        Returns:
-            torch.Tensor: Cosine similarity
-        """
         return torch.nn.functional.cosine_similarity(a, b, dim=-1)
 
-if __name__ == "__main__":
-    # Test the EmbeddingComponent
-    embedder = EmbeddingComponent()
+    def batch_embed(self, texts: List[str], batch_size: int = BATCH_SIZE) -> torch.Tensor:
+        logger.info(f"Batch embedding {len(texts)} texts with batch size {batch_size}")
+        all_embeddings = []
+        for i in range(0, len(texts), batch_size):
+            batch = texts[i:i+batch_size]
+            batch_embeddings = self.get_embeddings(batch)
+            all_embeddings.append(batch_embeddings)
+        return torch.cat(all_embeddings, dim=0)
 
-    # Test document embedding
-    docs = ["This is a test document.", "This is another test document."]
-    doc_embeddings = embedder.embed_documents(docs)
-    print(f"Document embeddings shape: {doc_embeddings.shape}")
-
-    # Test query embedding
-    query = "What is RAG?"
-    query_embedding = embedder.embed_query(query)
-    print(f"Query embedding shape: {query_embedding.shape}")
-
-    # Test cosine similarity
-    similarity = embedder.cosine_similarity(doc_embeddings[0].unsqueeze(0), query_embedding.unsqueeze(0))
-    print(f"Cosine similarity between first document and query: {similarity.item()}")
