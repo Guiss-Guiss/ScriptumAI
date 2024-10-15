@@ -8,6 +8,8 @@ from config import UPLOAD_FOLDER, ALLOWED_EXTENSIONS
 from datetime import datetime
 import threading
 import uuid
+import multiprocessing as mp
+from functools import partial
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -26,7 +28,7 @@ ingestion_tasks = {}
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-def ingest_document_thread(file_path, task_id):
+def ingest_document_worker(file_path, task_id):
     try:
         rag_app.ingest_document(file_path)
         ingestion_tasks[task_id] = "Completed"
@@ -56,8 +58,8 @@ def ingest_document():
                 logger.debug(f"Temporary file created: {temp_file.name}")
                 task_id = str(uuid.uuid4())
                 ingestion_tasks[task_id] = "In Progress"
-                thread = threading.Thread(target=ingest_document_thread, args=(temp_file.name, task_id))
-                thread.start()
+                process = mp.Process(target=ingest_document_worker, args=(temp_file.name, task_id))
+                process.start()
             logger.debug(f"Ingestion task started for file: {file.filename}")
             return jsonify({"message": "File ingestion task started", "task_id": task_id}), 202
         except Exception as e:
@@ -71,6 +73,31 @@ def ingest_document():
 def check_ingestion_status(task_id):
     status = ingestion_tasks.get(task_id, "Not Found")
     return jsonify({"status": status})
+
+@app.route('/api/ingested_files', methods=['GET'])
+def get_ingested_files():
+    try:
+        files = rag_app.get_ingested_files()
+        return jsonify(files)
+    except Exception as e:
+        logger.error(f"Error getting ingested files: {str(e)}", exc_info=True)
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/remove', methods=['POST'])
+def remove_document():
+    data = request.json
+    if not data or 'file_name' not in data:
+        return jsonify({"error": "No file name provided"}), 400
+    try:
+        file_name = data['file_name']
+        success = rag_app.remove_document(file_name)
+        if success:
+            return jsonify({"message": f"File {file_name} removed successfully"}), 200
+        else:
+            return jsonify({"error": f"File {file_name} not found or could not be removed"}), 404
+    except Exception as e:
+        logger.error(f"Error removing document: {str(e)}", exc_info=True)
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/query', methods=['POST'])
 def process_query():
@@ -160,4 +187,4 @@ def get_logs():
 
 if __name__ == '__main__':
     logger.info("Starting Flask server")
-    app.run(host='0.0.0.0', port=5001, debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
