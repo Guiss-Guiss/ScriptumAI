@@ -24,34 +24,51 @@ def fetch_logs():
         return []
     
 def render_system_logs(lang: str):
-    st.subheader(get_text("system_logs", lang))
+    st.header(get_text("system_logs", lang))
 
+    # Fetch logs
     logs = fetch_logs()
 
     if not logs:
         st.warning(get_text("no_logs_available", lang))
         return
 
-    log_levels = list(set(log['level'] for log in logs))
-    selected_levels = st.multiselect(get_text("filter_by_log_level", lang), log_levels, default=log_levels)
+    # Log level filter
+    log_levels = ["Choose an option", "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
+    selected_level = st.selectbox(
+        get_text("filter_by_log_level", lang),
+        options=log_levels,
+        index=0  # This sets "Choose an option" as the default
+    )
 
-    date_range = st.date_input(get_text("select_date_range", lang), [datetime.now().date(), datetime.now().date()])
+    # Date range filter
+    start_date = st.date_input(f"{get_text('select_date_range', lang)} - Start")
+    end_date = st.date_input(f"{get_text('select_date_range', lang)} - End")
 
-    search_term = st.text_input(get_text("search_logs", lang), "")
+    # Search filter
+    search_term = st.text_input(get_text("search_logs", lang))
 
-    filtered_logs = [
-        log for log in logs
-        if log['level'] in selected_levels
-        and date_range[0] <= datetime.fromisoformat(log['timestamp']).date() <= date_range[1]
-        and (search_term.lower() in log['message'].lower() or search_term.lower() in log['level'].lower())
-    ]
+    # Apply filters
+    filtered_logs = logs
+    if selected_level != "Choose an option":
+        filtered_logs = [log for log in filtered_logs if log['level'] == selected_level]
+    filtered_logs = [log for log in filtered_logs if start_date <= datetime.fromisoformat(log['timestamp']).date() <= end_date]
+    if search_term:
+        filtered_logs = [log for log in filtered_logs if search_term.lower() in log['message'].lower()]
 
+    # Display filtered logs
     for log in filtered_logs:
-        with st.expander(f"{log['timestamp']} - {log['level']}"):
-            st.write(log['message'])
+        st.text(f"{log['timestamp']} - {log['level']}: {log['message']}")
 
+    # Export logs button
     if st.button(get_text("export_logs", lang)):
-        export_logs(filtered_logs, lang)
+        csv = logs_to_csv(filtered_logs)
+        st.download_button(
+            label=get_text("download_logs", lang),
+            data=csv,
+            file_name="system_logs.csv",
+            mime="text/csv"
+        )
 
 def export_logs(logs, lang: str):
     log_text = "\n".join([f"{log['timestamp']} | {log['level']} | {log['message']}" for log in logs])

@@ -19,9 +19,18 @@ def load_ingested_files():
             return json.load(f)
     return []
 
-def save_ingested_files(files):
-    with open(INGESTED_FILES_PATH, "w") as f:
-        json.dump(files, f)
+def save_ingested_file(file_name: str):
+    try:
+        with open(INGESTED_FILES_PATH, 'r+') as f:
+            ingested_files = json.load(f)
+            if file_name not in ingested_files:
+                ingested_files.append(file_name)
+                f.seek(0)
+                json.dump(ingested_files, f, indent=2)
+                f.truncate()
+        logger.debug(f"Added {file_name} to ingested_files.json")
+    except Exception as e:
+        logger.error(f"Error saving ingested file {file_name}: {str(e)}", exc_info=True)
 
 def init_session_state():
     if 'ingested_files' not in st.session_state:
@@ -62,6 +71,7 @@ def check_ingestion_status(task_id: str, file_name: str, lang: str, max_retries:
                     if file_name not in st.session_state.ingested_files:
                         st.session_state.ingested_files.append(file_name)
                         save_ingested_files(st.session_state.ingested_files)
+                        save_ingested_file(file_name)
                     return True
                 elif status.startswith("Failed"):
                     status_placeholder.error(f"{get_text('ingestion_failed', lang)} {file_name}: {status}")
@@ -85,7 +95,6 @@ def check_ingestion_status(task_id: str, file_name: str, lang: str, max_retries:
 def render_file_upload(supported_types: List[str], lang: str):
     init_session_state()
     st.header(get_text("ingest_documents", lang))
-
 
     uploaded_files = st.file_uploader(get_text("choose_files", lang),
                                       type=supported_types,
@@ -190,4 +199,3 @@ def process_directory(dir_path: str, supported_types: List[str], lang: str):
             st.warning(get_text("failed_ingestion", lang).format(failed_ingests))
             for file in failed_files:
                 st.write(f"- {file}")
-
