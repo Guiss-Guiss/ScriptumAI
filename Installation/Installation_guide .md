@@ -98,7 +98,7 @@ python -m venv scriptum
 ```bash
 pip install -r requirements.txt
 ```
-- REBOOT the computer.
+- 'Reboot' the computer.
 
 ## 6. Run ScriptumAI
 
