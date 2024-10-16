@@ -99,6 +99,9 @@ python -m venv scriptum
 pip install -r requirements.txt
 ```
 
+- Reinicie la computadora.
+  
+
 ## 6. Ejecutar ScriptumAI
 
 1. En una terminal, asegúrese de estar en el directorio ScriptumAI y que su entorno virtual esté activado, luego ejecute:
