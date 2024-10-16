@@ -52,34 +52,40 @@ class IngestComponent:
             return SUPPORTED_LANGUAGES[0]
 
     def _batch_embed(self, chunks: List[str], device: torch.device) -> torch.Tensor:
+        logger.debug(f"Starting batch embedding of {len(chunks)} chunks")
         all_embeddings = []
         for i in range(0, len(chunks), BATCH_SIZE):
             batch = chunks[i:i + BATCH_SIZE]
+            logger.debug(f"Embedding batch {i//BATCH_SIZE + 1} of {len(chunks)//BATCH_SIZE + 1}")
             with torch.no_grad():
-                # Déplacer les embeddings sur le GPU choisi
                 embeddings = self.embedding_component.embed_documents(batch).to(device)
             all_embeddings.append(embeddings)
-        return torch.cat(all_embeddings, dim=0)
+        result = torch.cat(all_embeddings, dim=0)
+        logger.debug(f"Batch embedding complete. Shape: {result.shape}")
+        return result
 
     def _batch_ingest(self, chunks, ids, metadatas, device):
+        logger.debug(f"Starting batch ingest of {len(chunks)} chunks")
         embeddings = self._batch_embed(chunks, device)
         try:
             lang = metadatas[0]["language"]
             collection = self.collections.get(lang, self.collections[SUPPORTED_LANGUAGES[0]])
+            logger.debug(f"Adding to collection {collection.name}")
             collection.add(
                 ids=ids,
                 embeddings=embeddings.cpu().numpy().tolist(),
                 documents=chunks,
                 metadatas=metadatas
             )
-            logger.debug(f"Successfully ingested batch of {len(chunks)} chunks into {lang} collection")
+            logger.info(f"Successfully ingested batch of {len(chunks)} chunks into {lang} collection")
         except Exception as e:
             logger.error(f"Failed to ingest batch: {e}", exc_info=True)
+            raise
 
     def ingest_file(self, file_path: str, device: torch.device = None) -> Dict[str, Any]:
         if device is None:
             device = self.device
-        logger.debug(f"Ingesting file {file_path} on device {device}")
+        logger.info(f"Ingesting file {file_path} on device {device}")
 
         file_path = Path(file_path)
         if not file_path.exists():
@@ -92,75 +98,46 @@ class IngestComponent:
             raise ValueError(f"Unsupported file type: {file_type}")
 
         content = read_file(file_path)
+        logger.debug(f"File content read. Length: {len(content)}")
         chunks = chunk_text(content, chunk_size=CHUNK_SIZE, chunk_overlap=CHUNK_OVERLAP)
+        logger.debug(f"Text chunked into {len(chunks)} parts")
         metadata = get_file_metadata(file_path)
         lang = self._detect_language(content)
+        logger.debug(f"Detected language: {lang}")
 
         ids = [f"{file_path.stem}_{i}" for i in range(len(chunks))]
         metadatas = [{**metadata, "chunk_index": i, "language": lang} for i in range(len(chunks))]
 
-        # Ingestion
+        logger.debug("Starting batch ingest")
         self._batch_ingest(chunks, ids, metadatas, device)
 
-        logger.debug(f"Successfully ingested file {file_path}")
-        return {**metadata, "language": lang}
+        logger.info(f"Successfully ingested file {file_path}")
+        return {**metadata, "language": lang, "chunks_count": len(chunks)}
 
     def ingest_directory(self, directory_path: str, num_gpus: int) -> List[Dict[str, Any]]:
         directory_path = Path(directory_path)
         if not directory_path.is_dir():
             raise NotADirectoryError(f"Not a directory: {directory_path}")
 
-        logger.debug(f"Ingesting files from directory: {directory_path}")
+        logger.info(f"Ingesting files from directory: {directory_path}")
 
         file_paths = [file_path for file_path in directory_path.rglob("*") if file_path.is_file() and file_path.suffix.lower() in SUPPORTED_FILE_TYPES]
+        logger.info(f"Found {len(file_paths)} files to ingest")
 
-        file_groups = [file_paths[i::num_gpus] for i in range(num_gpus)]
-
-        processes = []
-        for gpu_id, files in enumerate(file_groups):
-            p = mp.Process(target=self._process_files_on_gpu, args=(files, gpu_id))
-            processes.append(p)
-            p.start()
-
-        for p in processes:
-            p.join()
-
-        logger.debug(f"Successfully ingested files from {directory_path} using {num_gpus} GPUs")
-
-    def _process_files_on_gpu(self, files: List[Path], gpu_id: int):
-        device = torch.device(f'cuda:{gpu_id}' if torch.cuda.is_available() else "cpu")
-        logger.debug(f"Processing {len(files)} files on GPU {gpu_id} ({device})")
-
-        all_chunks = []
-        all_file_metadata = []
-        all_ids = []
-
-        for file_path in files:
+        results = []
+        for file_path in tqdm(file_paths, desc="Ingesting files", unit="file"):
             try:
-                content = read_file(file_path)
-                chunks = chunk_text(content, chunk_size=CHUNK_SIZE, chunk_overlap=CHUNK_OVERLAP)
-                all_chunks.extend(chunks)
-
-                metadata = get_file_metadata(file_path)
-                lang = self._detect_language(content)
-                all_ids.extend([f"{file_path.stem}_{i}" for i in range(len(chunks))])
-                all_file_metadata.extend([{**metadata, "chunk_index": i, "language": lang} for i in range(len(chunks))])
-
-                if len(all_chunks) >= BATCH_SIZE:
-                    self._batch_ingest(all_chunks, all_ids, all_file_metadata, device)
-                    all_chunks.clear()
-                    all_ids.clear()
-                    all_file_metadata.clear()
-
+                result = self.ingest_file(str(file_path))
+                results.append(result)
             except Exception as e:
-                logger.error(f"Error ingesting file {file_path} on GPU {gpu_id}: {e}", exc_info=True)
+                logger.error(f"Error ingesting file {file_path}: {e}", exc_info=True)
+                results.append({"status": "failed", "file": str(file_path), "error": str(e)})
 
-        if all_chunks:
-            self._batch_ingest(all_chunks, all_ids, all_file_metadata, device)
+        logger.info(f"Finished ingesting {len(file_paths)} files from {directory_path}")
+        return results
 
     def check_chroma_health(self):
         try:
-
             self.chroma_client.heartbeat()
             return True
         except Exception as e:
@@ -177,10 +154,10 @@ class IngestComponent:
                 total_documents += count
             
             stats["total_documents"] = total_documents
-            stats["total_chunks"] = total_documents  # For backwards compatibility if needed
+            stats["total_chunks"] = total_documents
             
+            logger.info(f"Collection stats: {stats}")
             return stats
         except Exception as e:
             logger.error(f"Error getting collection stats: {e}")
             raise
-
