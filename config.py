@@ -1,5 +1,5 @@
 import os
-import torch  # Added to use torch.cuda.is_available()
+import torch
 from pathlib import Path
 import logging
 
@@ -55,11 +55,11 @@ logging.basicConfig(filename=LOG_FILE, level=LOG_LEVEL,
 
 # Flask API configuration (if you decide to use Flask for backend API)
 FLASK_HOST = "0.0.0.0"
-FLASK_PORT =1
+FLASK_PORT = 5001
 FLASK_DEBUG = False
 
 # Maximum file size for upload (in bytes)
-MAX_UPLOAD_SIZE = 10 * 1024 * 1024  # 10 MB
+MAX_UPLOAD_SIZE = 200 * 1024 * 1024  # 200 MB
 
 # Supported file types for document ingestion
 SUPPORTED_FILE_TYPES = [
