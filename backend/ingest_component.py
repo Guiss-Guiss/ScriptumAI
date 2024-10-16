@@ -7,6 +7,7 @@ import torch
 import torch.multiprocessing as mp
 import magic
 import langdetect
+import shutil
 
 from config import (
     CHROMA_PERSIST_DIRECTORY,
@@ -161,3 +162,12 @@ class IngestComponent:
         except Exception as e:
             logger.error(f"Error getting collection stats: {e}")
             raise
+
+    def clear_cache(self):
+        for pycache_dir in Path(".").rglob("__pycache__"):
+            try:
+                shutil.rmtree(pycache_dir)
+                logger.info(f"Cache {pycache_dir} supprimé avec succès.")
+            except Exception as e:
+                logger.error(f"Erreur lors de la suppression du cache {pycache_dir}: {e}", exc_info=True)
+
