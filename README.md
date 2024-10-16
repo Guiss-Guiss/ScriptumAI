@@ -52,7 +52,7 @@ The project follows a modular architecture with distinct components for embeddin
 ### Quick Start
 
 #### Prerequisites
-Python 3.8+, Flask, Streamlit, PyTorch, Ollama API, Chroma, pytest
+Python 3.8+ (tested with 3.12.7), Flask, Streamlit, PyTorch, Ollama API, Chroma, pytest
 
 #### Installation and Launch
 1. Clone the repository
@@ -124,7 +124,7 @@ Le projet suit une architecture modulaire avec des composants distincts pour l'i
 ### Démarrage Rapide
 
 #### Prérequis
-Python 3.8+, Flask, Streamlit, PyTorch, API Ollama, Chroma, pytest
+Python 3.8+ (testé su 3.12.7), Flask, Streamlit, PyTorch, API Ollama, Chroma, pytest
 
 #### Installation et Lancement
 1. Cloner le dépôt
@@ -196,7 +196,7 @@ El proyecto sigue una arquitectura modular con componentes distintos para la inc
 ### Inicio Rápido
 
 #### Requisitos Previos
-Python 3.8+, Flask, Streamlit, PyTorch, API de Ollama, Chroma, pytest
+Python 3.8+ (probado en 3.12.7), Flask, Streamlit, PyTorch, API de Ollama, Chroma, pytest
 
 #### Instalación y Lanzamiento
 1. Clonar el repositorio
