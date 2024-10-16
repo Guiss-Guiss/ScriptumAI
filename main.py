@@ -42,18 +42,6 @@ class RAGApplication:
         logger.info(f"Ingesting documents from directory: {directory_path}")
         return self.ingest_component.ingest_directory(directory_path)
 
-    def remove_document(self, file_name: str) -> bool:
-        try:
-            success = self.ingest_component.remove_file(file_name)
-            if success:
-                logger.info(f"File removed successfully: {file_name}")
-            else:
-                logger.warning(f"File not found or could not be removed: {file_name}")
-            return success
-        except Exception as e:
-            logger.error(f"Error removing document: {str(e)}", exc_info=True)
-            raise Exception(f"Error removing document: {str(e)}")
-
     def process_query(self, query: str) -> Dict[str, Any]:
         logger.info(f"Processing query: {query}")
         try:
@@ -87,18 +75,17 @@ def print_menu():
     print("\nRAG Application Menu:")
     print("1. Ingest a document")
     print("2. Ingest a directory")
-    print("3. Remove a document")
-    print("4. Process a query")
-    print("5. Perform semantic search")
-    print("6. Get system statistics")
-    print("7. Exit")
+    print("3. Process a query")
+    print("4. Perform semantic search")
+    print("5. Get system statistics")
+    print("6. Exit")
 
 def main():
     rag_app = RAGApplication()
 
     while True:
         print_menu()
-        choice = input("Enter your choice (1-7): ")
+        choice = input("Enter your choice (1-6): ")
 
         if choice == '1':
             file_path = input("Enter the path to the document: ")
@@ -117,20 +104,9 @@ def main():
                 logger.error(f"Error ingesting directory: {e}", exc_info=True)
                 print(f"Error ingesting directory: {str(e)}")
         elif choice == '3':
-            file_name = input("Enter the name of the document to remove: ")
-            try:
-                success = rag_app.remove_document(file_name)
-                if success:
-                    print(f"Removed document successfully: {file_name}")
-                else:
-                    print(f"Document not found or could not be removed: {file_name}")
-            except Exception as e:
-                logger.error(f"Error removing document: {e}", exc_info=True)
-                print(f"Error removing document: {str(e)}")
-        elif choice == '4':
             query = input("Enter your query: ")
             rag_app.process_query(query)
-        elif choice == '5':
+        elif choice == '4':
             query = input("Enter your search query: ")
             try:
                 results = rag_app.semantic_search(query)
@@ -139,7 +115,7 @@ def main():
             except Exception as e:
                 logger.error(f"Error performing semantic search: {e}", exc_info=True)
                 print(f"Error performing semantic search: {str(e)}")
-        elif choice == '6':
+        elif choice == '5':
             try:
                 stats = rag_app.get_stats()
                 for key, value in stats.items():
@@ -147,11 +123,8 @@ def main():
             except Exception as e:
                 logger.error(f"Error getting system statistics: {e}", exc_info=True)
                 print(f"Error getting system statistics: {str(e)}")
-        elif choice == '7':
+        elif choice == '6':
             print("Exiting RAG Application. Goodbye!")
             break
         else:
             print("Invalid choice. Please try again.")
-
-if __name__ == "__main__":
-    main()

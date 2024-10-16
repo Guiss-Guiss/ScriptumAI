@@ -11,14 +11,21 @@ from loguru import logger
 import chromadb
 import time
 import sqlite3
-import multiprocessing as mp
-from functools import partial
 from config import CHUNK_SIZE, CHUNK_OVERLAP, CHROMA_PERSIST_DIRECTORY, CHROMA_COLLECTION_NAME, MAX_RETRIES, RETRY_DELAY
 
 def read_file(file_path: Path) -> str:
+    """
+    Read the content of a file based on its type.
+
+    Args:
+        file_path (Path): Path to the file.
+
+    Returns:
+        str: Content of the file.
+    """
     logger.debug(f"Attempting to read file: {file_path}")
     file_type = magic.from_file(str(file_path), mime=True)
-    logger.debug(f"File type detected: {file_type}")
+    logger.debug(f"File type detected: {magic.from_file(str(file_path), mime=True)}")
 
     try:
         if file_type == 'text/plain':
@@ -59,6 +66,17 @@ def read_markdown(file_path: Path) -> str:
         return BeautifulSoup(html, 'html.parser').get_text()
 
 def chunk_text(text: str, chunk_size: int = CHUNK_SIZE, chunk_overlap: int = CHUNK_OVERLAP) -> List[str]:
+    """
+    Split the text into overlapping chunks.
+
+    Args:
+        text (str): The text to be chunked.
+        chunk_size (int): The size of each chunk.
+        chunk_overlap (int): The number of overlapping characters between chunks.
+
+    Returns:
+        List[str]: A list of text chunks.
+    """
     chunks = []
     start = 0
     text_length = len(text)
@@ -72,6 +90,15 @@ def chunk_text(text: str, chunk_size: int = CHUNK_SIZE, chunk_overlap: int = CHU
     return chunks
 
 def get_file_metadata(file_path: Path) -> Dict[str, Any]:
+    """
+    Get metadata for a file.
+
+    Args:
+        file_path (Path): Path to the file.
+
+    Returns:
+        Dict[str, Any]: A dictionary containing file metadata.
+    """
     stats = file_path.stat()
     return {
         "filename": file_path.name,
@@ -84,6 +111,15 @@ def get_file_metadata(file_path: Path) -> Dict[str, Any]:
     }
 
 def get_file_hash(file_path: Path) -> str:
+    """
+    Calculate the SHA-256 hash of a file.
+
+    Args:
+        file_path (Path): Path to the file.
+
+    Returns:
+        str: The hexadecimal representation of the file's SHA-256 hash.
+    """
     sha256_hash = hashlib.sha256()
     with open(file_path, "rb") as f:
         for byte_block in iter(lambda: f.read(4096), b""):
@@ -91,8 +127,20 @@ def get_file_hash(file_path: Path) -> str:
     return sha256_hash.hexdigest()
 
 def clean_text(text: str) -> str:
+    """
+    Clean and normalize text.
+
+    Args:
+        text (str): The text to be cleaned.
+
+    Returns:
+        str: The cleaned text.
+    """
+    # Remove extra whitespace
     text = ' '.join(text.split())
+    # Convert to lowercase
     text = text.lower()
+    # Add more cleaning steps as needed
     return text
 
 def initialize_chroma_client():
@@ -102,7 +150,7 @@ def initialize_chroma_client():
             chroma_client = chromadb.PersistentClient(path=str(CHROMA_PERSIST_DIRECTORY))
             collection = chroma_client.get_or_create_collection(
                 name=CHROMA_COLLECTION_NAME,
-                metadata={"hnsw:space": "cosine", "name": CHROMA_COLLECTION_NAME}
+                metadata={"hnsw:space": "cosine", "name": CHROMA_COLLECTION_NAME}  # Add the name to metadata
             )
             logger.info(f"Successfully initialized ChromaDB client and collection: {CHROMA_COLLECTION_NAME}")
             return chroma_client, collection
@@ -116,25 +164,3 @@ def initialize_chroma_client():
                 logger.error("Max retries reached. Unable to initialize ChromaDB.", exc_info=True)
                 raise
 
-def process_directory(directory_path: str) -> List[Dict[str, Any]]:
-    path = Path(directory_path)
-    file_paths = [f for f in path.rglob("*") if f.is_file()]
-    
-    with mp.Pool(processes=mp.cpu_count()) as pool:
-        results = pool.map(process_file, file_paths)
-    
-    return [result for result in results if result is not None]
-
-def process_file(file_path: Path) -> Dict[str, Any]:
-    try:
-        content = read_file(file_path)
-        chunks = chunk_text(content)
-        metadata = get_file_metadata(file_path)
-        return {
-            "file_path": str(file_path),
-            "chunks": chunks,
-            "metadata": metadata
-        }
-    except Exception as e:
-        logger.error(f"Error processing file {file_path}: {str(e)}")
-        return None

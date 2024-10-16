@@ -102,11 +102,6 @@ TRANSLATIONS = {
         "ingested_files": "Ingested files",
         "refresh_ingested_files": "Refresh ingested files list",
         "no_ingested_files": "No files ingested yet.",
-        "remove_file": "Remove",
-        "file_removed_success": "File {} removed successfully.",
-        "file_removal_failed": "Failed to remove file {}: {}",
-        "file_removal_error": "Error removing file {}: {}",
-        "remove_file": "Remove",
     },
     "fr": {
         "menu": "Menu",
@@ -210,11 +205,6 @@ TRANSLATIONS = {
         "ingested_files": "Fichiers ingérés",
         "refresh_ingested_files": "Actualiser la liste des fichiers ingérés",
         "no_ingested_files": "Aucun fichier ingéré pour le moment.",
-        "remove_file": "Supprimer",
-        "file_removed_success": "Fichier {} supprimé avec succès.",
-        "file_removal_failed": "Échec de la suppression du fichier {}: {}",
-        "file_removal_error": "Erreur lors de la suppression du fichier {}: {}",
-        "remove_file": "Supprimer",
     },
     "es": {
         "menu": "Menú",
@@ -319,11 +309,6 @@ TRANSLATIONS = {
         "ingested_files": "Ingested files",
         "refresh_ingested_files": "Refresh ingested files list",
         "no_ingested_files": "No files ingested yet.",
-        "remove_file": "Eliminar",
-        "file_removed_success": "Archivo {} eliminado con éxito.",
-        "file_removal_failed": "No se pudo eliminar el archivo {}: {}",
-        "file_removal_error": "Error al eliminar el archivo {}: {}",
-        "remove_file": "Eliminar",
     }
 }
 

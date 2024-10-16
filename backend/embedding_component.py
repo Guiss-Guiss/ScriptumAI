@@ -1,6 +1,5 @@
 import ollama
 import torch
-import torch.multiprocessing as mp
 from typing import List, Union
 from config import OLLAMA_BASE_URL, EMBEDDING_MODEL, BATCH_SIZE, EMBEDDING_DEVICE
 from loguru import logger
@@ -16,32 +15,31 @@ class EmbeddingComponent:
         if isinstance(texts, str):
             texts = [texts]
 
-        with mp.Pool(processes=mp.cpu_count()) as pool:
-            embeddings = pool.map(self._get_single_embedding, texts)
+        all_embeddings = []
+        for text in texts:
+            try:
+                logger.debug(f"Sending request to Ollama API for text: {text[:50]}...")
+                logger.debug(f"Using model: {self.model}")
+                logger.debug(f"Ollama base URL: {OLLAMA_BASE_URL}")
 
-        return torch.tensor(embeddings, device=self.device)
+                response = self.client.embeddings(model=self.model, prompt=text)
+                logger.debug(f"Raw API response: {response}")
 
-    def _get_single_embedding(self, text: str) -> List[float]:
-        try:
-            logger.debug(f"Sending request to Ollama API for text: {text[:50]}...")
-            logger.debug(f"Using model: {self.model}")
-            logger.debug(f"Ollama base URL: {OLLAMA_BASE_URL}")
+                if not isinstance(response, dict):
+                    logger.error(f"Unexpected response type: {type(response)}")
+                    raise TypeError(f"Expected dict, got {type(response)}")
 
-            response = self.client.embeddings(model=self.model, prompt=text)
-            logger.debug(f"Raw API response: {response}")
+                if 'embedding' not in response:
+                    logger.error(f"'embedding' key not found in response. Keys present: {list(response.keys())}")
+                    raise KeyError("'embedding' key not found in API response")
 
-            if not isinstance(response, dict):
-                logger.error(f"Unexpected response type: {type(response)}")
-                raise TypeError(f"Expected dict, got {type(response)}")
+                embedding = response['embedding']
+                all_embeddings.append(embedding)
+            except Exception as e:
+                logger.error(f"Error getting embedding for text: {str(e)}", exc_info=True)
+                raise
 
-            if 'embedding' not in response:
-                logger.error(f"'embedding' key not found in response. Keys present: {list(response.keys())}")
-                raise KeyError("'embedding' key not found in API response")
-
-            return response['embedding']
-        except Exception as e:
-            logger.error(f"Error getting embedding for text: {str(e)}", exc_info=True)
-            raise
+        return torch.tensor(all_embeddings, device=self.device)
 
     def embed_documents(self, documents: List[str]) -> torch.Tensor:
         logger.info(f"Embedding {len(documents)} documents")
@@ -53,14 +51,15 @@ class EmbeddingComponent:
 
     @staticmethod
     def cosine_similarity(a: torch.Tensor, b: torch.Tensor) -> torch.Tensor:
-        return torch.nn.functional.cosine_similarity(a, b, dim=-1)
+        """
+        Compute cosine similarity between two tensors.
 
-    def batch_embed(self, texts: List[str], batch_size: int = BATCH_SIZE) -> torch.Tensor:
-        logger.info(f"Batch embedding {len(texts)} texts with batch size {batch_size}")
-        all_embeddings = []
-        for i in range(0, len(texts), batch_size):
-            batch = texts[i:i+batch_size]
-            batch_embeddings = self.get_embeddings(batch)
-            all_embeddings.append(batch_embeddings)
-        return torch.cat(all_embeddings, dim=0)
+        Args:
+            a (torch.Tensor): First tensor
+            b (torch.Tensor): Second tensor
+
+        Returns:
+            torch.Tensor: Cosine similarity
+        """
+        return torch.nn.functional.cosine_similarity(a, b, dim=-1)
 
