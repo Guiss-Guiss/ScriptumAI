@@ -94,7 +94,7 @@ ALLOWED_EXTENSIONS = {'txt', 'pdf', 'docx', 'html', 'md'}
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # Add the missing API_BASE_URL configuration
-API_BASE_URL = "http://localhost:5000" 
+API_BASE_URL = "http://localhost:5001" 
 
 # Supported languages configuration
 SUPPORTED_LANGUAGES = ['en', 'fr', 'es']
