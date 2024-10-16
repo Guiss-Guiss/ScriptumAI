@@ -55,7 +55,7 @@ logging.basicConfig(filename=LOG_FILE, level=LOG_LEVEL,
 
 # Flask API configuration (if you decide to use Flask for backend API)
 FLASK_HOST = "0.0.0.0"
-FLASK_PORT = 5000
+FLASK_PORT =1
 FLASK_DEBUG = False
 
 # Maximum file size for upload (in bytes)
