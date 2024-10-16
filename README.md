@@ -58,8 +58,8 @@ Python 3.8+, Flask, Streamlit, PyTorch, Ollama API, Chroma, pytest
 1. Clone the repository
 2. Create a virtual environment
 3. Install dependencies: `pip install -r requirements.txt`
-4. Launch backend: `flask run`
-5. Launch frontend: `streamlit run frontend/app.py`
+4. Launch backend: `python api.py`
+5. Launch frontend in another terminal: `streamlit run app.py`
 
 ### License
 
@@ -131,7 +131,7 @@ Python 3.8+, Flask, Streamlit, PyTorch, API Ollama, Chroma, pytest
 2. Créer un environnement virtuel
 3. Installer les dépendances : `pip install -r requirements.txt`
 4. Lancer le backend : `python api.py`
-5. Lancer le frontend : `streamlit run app.py`
+5. Dans un autre terminal, lancer le frontend : `streamlit run app.py`
 
 ### Licence
 
@@ -202,8 +202,8 @@ Python 3.8+, Flask, Streamlit, PyTorch, API de Ollama, Chroma, pytest
 1. Clonar el repositorio
 2. Crear un entorno virtual
 3. Instalar dependencias: `pip install -r requirements.txt`
-4. Lanzar backend: `python api.py`
-5. Lanzar frontend: `streamlit run app.py`
+4. Inicie el backend: `python api.py`
+5. En otra terminal, inicie el frontend: `streamlit run app.py`
 
 ### Licencia
 
