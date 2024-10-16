@@ -5,7 +5,7 @@
 ## English
 
 ### Introduction
-RAG Application ScriptumAI is an advanced Retrieval-Augmented Generation platform designed for document ingestion, semantic search, and query processing. It leverages cutting-edge machine learning and natural language processing techniques.
+RAG Application ScriptumAI is a private and advanced Retrieval-Augmented Generation platform designed for document ingestion, semantic search, and query processing. It leverages cutting-edge machine learning and natural language processing techniques.
 
 ### Key Technologies
 - **Backend**: Flask
@@ -77,7 +77,7 @@ Please read our [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of co
 ## Français
 
 ### Introduction
-RAG Application ScriptumAI est une plateforme avancée de Génération Augmentée par Récupération conçue pour l'ingestion de documents, la recherche sémantique et le traitement des requêtes. Elle utilise des techniques de pointe en apprentissage automatique et en traitement du langage naturel.
+RAG Application ScriptumAI est une plateforme privée et avancée de Génération Augmentée par Récupération conçue pour l'ingestion de documents, la recherche sémantique et le traitement des requêtes. Elle utilise des techniques de pointe en apprentissage automatique et en traitement du langage naturel.
 
 ### Technologies Clés
 - **Backend**: Flask
@@ -149,7 +149,7 @@ Veuillez lire notre [CONTRIBUTING.md](CONTRIBUTING.md) pour plus de détails sur
 ## Español
 
 ### Introducción
-RAG Application ScriptumAI es una plataforma avanzada de Generación Aumentada por Recuperación diseñada para la ingestión de documentos, búsqueda semántica y procesamiento de consultas. Utiliza técnicas de vanguardia en aprendizaje automático y procesamiento del lenguaje natural.
+RAG Application ScriptumAI es una plataforma privado y avanzada de Generación Aumentada por Recuperación diseñada para la ingestión de documentos, búsqueda semántica y procesamiento de consultas. Utiliza técnicas de vanguardia en aprendizaje automático y procesamiento del lenguaje natural.
 
 ### Tecnologías Clave
 - **Backend**: Flask
