@@ -100,7 +100,6 @@ def render_file_upload(supported_types: List[str], lang: str):
         if st.button(get_text("ingest_selected", lang)):
             process_uploads(uploaded_files, lang)
 
-    # Directory uploader
     st.subheader(get_text("or_ingest_directory", lang))
     dir_path = st.text_input(get_text("enter_directory_path", lang))
     if dir_path and st.button(get_text("ingest_directory", lang)):
@@ -109,11 +108,9 @@ def render_file_upload(supported_types: List[str], lang: str):
         else:
             process_directory(dir_path, supported_types, lang)
 
-    # Display supported file types
     st.subheader(get_text("supported_file_types", lang))
     st.write(", ".join(supported_types))
 
-    # Display list of ingested files
     st.subheader(get_text("ingested_files", lang))
     if st.session_state.ingested_files:
         for file in st.session_state.ingested_files:
