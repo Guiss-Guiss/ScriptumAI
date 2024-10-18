@@ -81,6 +81,11 @@ cd ScriptumAI
 ```bash
 python -m venv scriptum
 ```
+ou
+```bash
+python3 -m venv scriptum
+```
+
 3. Activez l'environnement virtuel :
 
 - Sur Windows :
