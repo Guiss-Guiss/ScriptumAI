@@ -57,7 +57,7 @@ ollama --version
 Descargue los modelos necesarios para ScriptumAI:
 
 ```bash
-ollama pull llama3.2
+ollama pull llama3.1:latest
 ollama pull nomic-embed-text
 ```
 
@@ -99,6 +99,10 @@ python -m venv scriptum
 pip install -r requirements.txt
 ```
 
+ - MacOS 
+```bash
+brew install libmagic
+```
 - Reinicie la computadora.
   
 

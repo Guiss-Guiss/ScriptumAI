@@ -10,7 +10,9 @@ from config import (
     LLM_MAX_TOKENS,
     TOP_K_RESULTS,
     EMBEDDING_DEVICE,
-    SUPPORTED_LANGUAGES
+    SUPPORTED_LANGUAGES,
+    TEMPERATURE,
+    TOP_P
 )
 from backend.embedding_component import EmbeddingComponent
 from backend.retrieval_component import RetrievalComponent
@@ -68,7 +70,7 @@ class QueryComponent:
         context = "\n".join(context_parts)
 
         prompt = f"""
-        You are an AI assistant specialized in the literary analysis of Richard Ste-Marie's works. Your task is to provide detailed and in-depth answers based on the given context. Follow these guidelines:
+        You are an AI assistant specialized in the literary analysis. Your task is to provide detailed and in-depth answers based on the given context. Follow these guidelines:
 
             1. Carefully analyze all the provided excerpts.
             2. Synthesize the information from multiple excerpts to form a coherent and detailed answer.
@@ -80,11 +82,14 @@ class QueryComponent:
             8. Aim for an answer of at least 150 words, but expand further if the information and question justify it.
 
             Base your response primarily on the provided context. If you make inferences or connections beyond the given information, clearly state it.
+            If the query langauge is not English, please provide the response in the detected language.
 
         Context:
         {context}
 
         User Question: {query}
+
+        Language: {query_lang}
 
         Assistant:
         """
@@ -98,8 +103,8 @@ class QueryComponent:
                 prompt=prompt,
                 options={
                     "max_tokens": LLM_MAX_TOKENS,
-                    "temperature": 0.7,
-                    "top_p": 0.9,
+                    "temperature": TEMPERATURE,
+                    "top_p": TOP_P,
                 }
             )
             logger.debug(f"Received response from Ollama API: {response}")

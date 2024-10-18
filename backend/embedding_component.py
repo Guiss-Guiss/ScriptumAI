@@ -38,7 +38,6 @@ class EmbeddingComponent:
                 
                 if len(embedding) != self.dimension:
                     logger.warning(f"Embedding dimension mismatch. Expected: {self.dimension}, Got: {len(embedding)}")
-                    # Adjust the embedding to match the expected dimension
                     if len(embedding) < self.dimension:
                         embedding += [0] * (self.dimension - len(embedding))
                     else:

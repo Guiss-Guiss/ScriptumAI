@@ -26,8 +26,10 @@ EMBEDDING_DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 EMBEDDING_DIMENSION = 768
 
 # LLM configuration for query processing
-LLM_MODEL = "llama3.2:latest" 
-LLM_MAX_TOKENS = 4096
+LLM_MODEL = "llama3.1:latest" 
+LLM_MAX_TOKENS = 16384
+TEMPERATURE = 0.7
+TOP_P = 0.9
 
 # Vector store configuration
 VECTOR_STORE_TYPE = "chroma" 
@@ -71,8 +73,7 @@ SUPPORTED_FILE_TYPES = [
     'text/plain',
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
     'text/html',
-    'text/markdown'
-    
+    'text/markdown' 
 ]
 
 # Performance tuning

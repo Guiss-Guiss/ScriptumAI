@@ -1,6 +1,3 @@
-
-
-import os
 from typing import List, Dict, Any
 from pathlib import Path
 from loguru import logger
@@ -146,7 +143,6 @@ class IngestComponent:
                     unit="file"
                 ))
         else:
-            # Single GPU or CPU processing
             results = []
             for file_path in tqdm(file_paths, desc="Ingesting files", unit="file"):
                 try:

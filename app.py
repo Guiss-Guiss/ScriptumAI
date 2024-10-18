@@ -22,9 +22,6 @@ import logging
 import sys
 import os
 
-
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 from frontend.components.system_health import render_system_health
 from frontend.components.system_logs import render_system_logs
 from frontend.components.file_upload import render_file_upload
@@ -33,13 +30,15 @@ from frontend.config import API_BASE_URL
 from frontend.translations import get_text
 from frontend.language_utils import render_language_selector, get_user_language
 
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 logger.debug(f"Current Python path in app.py: {sys.path}")
 logger.debug(f"Current working directory: {os.getcwd()}")
 
-st.set_page_config(page_title="RAG Application", page_icon="📚", layout="wide")
+st.set_page_config(page_title="ScriptumAI", page_icon="📚", layout="wide")
 
 current_lang = get_user_language()
 

@@ -1,12 +1,10 @@
 import os
 import logging
-from pathlib import Path
 from typing import List, Dict, Any
 from loguru import logger
 
 from config import (
-    CHROMA_PERSIST_DIRECTORY,
-    CHROMA_COLLECTION_NAME,
+
     SUPPORTED_FILE_TYPES,
     LLM_MODEL
 )
