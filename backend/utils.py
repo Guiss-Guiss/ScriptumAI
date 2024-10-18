@@ -66,17 +66,7 @@ def read_markdown(file_path: Path) -> str:
         return BeautifulSoup(html, 'html.parser').get_text()
 
 def chunk_text(text: str, chunk_size: int = CHUNK_SIZE, chunk_overlap: int = CHUNK_OVERLAP) -> List[str]:
-    """
-    Split the text into overlapping chunks.
 
-    Args:
-        text (str): The text to be chunked.
-        chunk_size (int): The size of each chunk.
-        chunk_overlap (int): The number of overlapping characters between chunks.
-
-    Returns:
-        List[str]: A list of text chunks.
-    """
     chunks = []
     start = 0
     text_length = len(text)
@@ -90,15 +80,7 @@ def chunk_text(text: str, chunk_size: int = CHUNK_SIZE, chunk_overlap: int = CHU
     return chunks
 
 def get_file_metadata(file_path: Path) -> Dict[str, Any]:
-    """
-    Get metadata for a file.
 
-    Args:
-        file_path (Path): Path to the file.
-
-    Returns:
-        Dict[str, Any]: A dictionary containing file metadata.
-    """
     stats = file_path.stat()
     return {
         "filename": file_path.name,
@@ -111,15 +93,7 @@ def get_file_metadata(file_path: Path) -> Dict[str, Any]:
     }
 
 def get_file_hash(file_path: Path) -> str:
-    """
-    Calculate the SHA-256 hash of a file.
 
-    Args:
-        file_path (Path): Path to the file.
-
-    Returns:
-        str: The hexadecimal representation of the file's SHA-256 hash.
-    """
     sha256_hash = hashlib.sha256()
     with open(file_path, "rb") as f:
         for byte_block in iter(lambda: f.read(4096), b""):
@@ -127,20 +101,10 @@ def get_file_hash(file_path: Path) -> str:
     return sha256_hash.hexdigest()
 
 def clean_text(text: str) -> str:
-    """
-    Clean and normalize text.
 
-    Args:
-        text (str): The text to be cleaned.
-
-    Returns:
-        str: The cleaned text.
-    """
-    # Remove extra whitespace
     text = ' '.join(text.split())
-    # Convert to lowercase
     text = text.lower()
-    # Add more cleaning steps as needed
+
     return text
 
 def initialize_chroma_client():
