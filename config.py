@@ -78,7 +78,7 @@ SUPPORTED_FILE_TYPES = [
 
 # Performance tuning
 MAX_CONCURRENT_REQUESTS = 10
-BATCH_SIZE = 32
+BATCH_SIZE = 128
 
 # Error handling and retry configuration
 MAX_RETRIES = 3
