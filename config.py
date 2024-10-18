@@ -18,18 +18,18 @@ PROCESSED_DATA_DIR.mkdir(parents=True, exist_ok=True)
 INDEX_DIR.mkdir(parents=True, exist_ok=True)
 
 # Ollama configuration
-OLLAMA_BASE_URL = "http://localhost:11434"  # Default Ollama API endpoint
+OLLAMA_BASE_URL = "http://localhost:11434" 
 
 # Embedding model configuration
-EMBEDDING_MODEL = "llama3.2"  # or another model that's available in your Ollama installation
-EMBEDDING_DEVICE = "cuda" if torch.cuda.is_available() else "cpu"  # Added as per instructions
+EMBEDDING_MODEL = "llama3.2" 
+EMBEDDING_DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 # LLM configuration for query processing
-LLM_MODEL = "llama3.2:latest"  # Llama3.2 model in Ollama
-LLM_MAX_TOKENS = 2048  # Maximum number of tokens for LLM response
+LLM_MODEL = "llama3.2:latest" 
+LLM_MAX_TOKENS = 2048 
 
 # Vector store configuration
-VECTOR_STORE_TYPE = "chroma"  # Using Chroma as per the source code
+VECTOR_STORE_TYPE = "chroma" 
 CHROMA_PERSIST_DIRECTORY = INDEX_DIR / "chroma"
 CHROMA_COLLECTION_NAME = "buildragwithpython"
 
@@ -53,13 +53,13 @@ logging.basicConfig(filename=LOG_FILE, level=LOG_LEVEL,
                     format='%(asctime)s | %(levelname)s | %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S')
 
-# Flask API configuration (if you decide to use Flask for backend API)
+# Flask API configuration
 FLASK_HOST = "0.0.0.0"
 FLASK_PORT = 5001
 FLASK_DEBUG = False
 
 # Maximum file size for upload (in bytes)
-MAX_UPLOAD_SIZE = 200 * 1024 * 1024  # 200 MB
+MAX_UPLOAD_SIZE = 200 * 1024 * 1024
 
 # Supported file types for document ingestion
 SUPPORTED_FILE_TYPES = [
@@ -71,14 +71,14 @@ SUPPORTED_FILE_TYPES = [
 
 # Performance tuning
 MAX_CONCURRENT_REQUESTS = 10
-BATCH_SIZE = 32  # For batch processing in embedding and retrieval
+BATCH_SIZE = 32
 
 # Error handling and retry configuration
 MAX_RETRIES = 3
-RETRY_DELAY = 5  # seconds
+RETRY_DELAY = 5 
 
 # Security settings
-SECRET_KEY = os.environ.get("SECRET_KEY", "your-secret-key-here")  # INPUT_REQUIRED {config_description}
+SECRET_KEY = os.environ.get("SECRET_KEY", "your-secret-key-here")
 
 # Ollama models to ensure are pulled
 REQUIRED_OLLAMA_MODELS = [
