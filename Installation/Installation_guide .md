@@ -81,7 +81,7 @@ cd ScriptumAI
 ```bash
 python -m venv scriptum
 ```
-or
+Or
 ```bash
 python3 -m venv scriptum
 ```
