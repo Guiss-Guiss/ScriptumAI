@@ -21,12 +21,13 @@ INDEX_DIR.mkdir(parents=True, exist_ok=True)
 OLLAMA_BASE_URL = "http://localhost:11434" 
 
 # Embedding model configuration
-EMBEDDING_MODEL = "llama3.2" 
+EMBEDDING_MODEL = "nomic-embed-text" 
 EMBEDDING_DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+EMBEDDING_DIMENSION = 768
 
 # LLM configuration for query processing
 LLM_MODEL = "llama3.2:latest" 
-LLM_MAX_TOKENS = 2048 
+LLM_MAX_TOKENS = 4096
 
 # Vector store configuration
 VECTOR_STORE_TYPE = "chroma" 
@@ -34,7 +35,10 @@ CHROMA_PERSIST_DIRECTORY = INDEX_DIR / "chroma"
 CHROMA_COLLECTION_NAME = "buildragwithpython"
 
 # Retrieval configuration
-TOP_K_RESULTS = 5
+TOP_K_RESULTS = 100
+EF_CONSTRUCTION = 200 
+M_CONSTRUCTION = 16
+
 
 # Ingestion configuration
 CHUNK_SIZE = 1000
@@ -59,13 +63,15 @@ FLASK_PORT = 5001
 FLASK_DEBUG = False
 
 # Maximum file size for upload (in bytes)
-MAX_UPLOAD_SIZE = 200 * 1024 * 1024
+MAX_UPLOAD_SIZE = 1024 * 1024 * 1024 # 1 GB
 
 # Supported file types for document ingestion
 SUPPORTED_FILE_TYPES = [
     'application/pdf',
     'text/plain',
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    'text/html',
+    'text/markdown'
     
 ]
 

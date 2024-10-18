@@ -66,7 +66,7 @@ if choice_key == "home":
     st.write(get_text("navigation_instruction", current_lang))
 
 elif choice_key == "ingest_documents":
-    render_file_upload(["txt", "pdf", "docx"], current_lang)
+    render_file_upload(["txt", "pdf", "docx", "md"], current_lang)
 
 elif choice_key == "query":
     st.header(get_text("process_query", current_lang))
