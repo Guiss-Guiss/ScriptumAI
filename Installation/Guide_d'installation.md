@@ -106,7 +106,7 @@ pip install -r requirements.txt
 ```bash
 brew install libmagic
 ```
-```
+
 
 ## 6. Lancer ScriptumAI
 
