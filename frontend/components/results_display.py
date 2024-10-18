@@ -52,6 +52,37 @@ def display_search_results(results: List[Dict[str, Any]], lang: str):
 def render_results(result_type: str, data: Any, lang: str):
     st.header(get_text("results_display", lang))
 
+    if WORDCLOUD_AVAILABLE:
+        try:
+
+            text = data['response'] if result_type == "query" else ' '.join([r['chunk'] for r in data])
+            logger.debug(f"Generating word cloud for text: {text[:100]}...")  # Log first 100 chars of text
+            wordcloud = WordCloud(width=800, height=400, background_color='white').generate(text)
+
+            fig, ax = plt.subplots()
+            ax.imshow(wordcloud, interpolation='bilinear')
+            ax.axis('off')
+            st.pyplot(fig)
+            logger.debug("Word cloud generated and displayed successfully")
+        except Exception as e:
+            logger.error(f"Error generating word cloud: {e}", exc_info=True)
+            st.warning(get_text("wordcloud_generation_failed", lang))
+    else:
+        logger.warning("WordCloud or matplotlib not available")
+        st.info(get_text("wordcloud_not_available", lang))
+        st.markdown("""
+        It seems that WordCloud or matplotlib is not available in the current environment.
+        Please check the following:
+        1. Ensure you're running the application in the correct virtual environment.
+        2. Try reinstalling the libraries:
+            ```
+            pip uninstall wordcloud matplotlib
+            pip install wordcloud matplotlib
+            ```
+        3. If the problem persists, check the application logs for more details.
+        """)
+
+
     if result_type == "query":
         display_query_result(data, lang)
     elif result_type == "search":
@@ -59,52 +90,24 @@ def render_results(result_type: str, data: Any, lang: str):
     else:
         st.error(get_text("unknown_result_type", lang).format(result_type))
 
+
     if (result_type == "query" and 'relevant_chunks' in data and data['relevant_chunks']) or \
-       (result_type == "search" and data):
+    (result_type == "search" and data):
         st.subheader(get_text("result_analysis", lang))
 
-        if result_type == "query":
-            df = pd.DataFrame([
-                {"Chunk": f"{get_text('chunk', lang)} {i+1}", "Similarity Score": chunk['similarity_score']}
-                for i, chunk in enumerate(data['relevant_chunks'])
-            ])
-        else: 
-            df = pd.DataFrame([
-                {"Result": f"{get_text('result', lang)} {i+1}", "Similarity Score": result['similarity_score']}
-                for i, result in enumerate(data)
-            ])
+    if result_type == "query":
+        df = pd.DataFrame([
+            {"Chunk": f"{get_text('chunk', lang)} {i+1}", "Similarity Score": chunk['similarity_score']}
+            for i, chunk in enumerate(data['relevant_chunks'])
+        ])
+    else: 
+        df = pd.DataFrame([
+            {"Result": f"{get_text('result', lang)} {i+1}", "Similarity Score": result['similarity_score']}
+            for i, result in enumerate(data)
+        ])
 
         st.bar_chart(df.set_index("Chunk" if result_type == "query" else "Result")["Similarity Score"])
 
-        if WORDCLOUD_AVAILABLE:
-            try:
-                st.subheader(get_text("word_cloud", lang))
-                text = data['response'] if result_type == "query" else ' '.join([r['chunk'] for r in data])
-                logger.debug(f"Generating word cloud for text: {text[:100]}...")  # Log first 100 chars of text
-                wordcloud = WordCloud(width=800, height=400, background_color='white').generate(text)
-
-                fig, ax = plt.subplots()
-                ax.imshow(wordcloud, interpolation='bilinear')
-                ax.axis('off')
-                st.pyplot(fig)
-                logger.debug("Word cloud generated and displayed successfully")
-            except Exception as e:
-                logger.error(f"Error generating word cloud: {e}", exc_info=True)
-                st.warning(get_text("wordcloud_generation_failed", lang))
-        else:
-            logger.warning("WordCloud or matplotlib not available")
-            st.info(get_text("wordcloud_not_available", lang))
-            st.markdown("""
-            It seems that WordCloud or matplotlib is not available in the current environment.
-            Please check the following:
-            1. Ensure you're running the application in the correct virtual environment.
-            2. Try reinstalling the libraries:
-               ```
-               pip uninstall wordcloud matplotlib
-               pip install wordcloud matplotlib
-               ```
-            3. If the problem persists, check the application logs for more details.
-            """)
 
     # Export results
     if st.button(get_text("export_results", lang)):

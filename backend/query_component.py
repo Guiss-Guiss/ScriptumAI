@@ -68,9 +68,18 @@ class QueryComponent:
         context = "\n".join(context_parts)
 
         prompt = f"""
-        You are a helpful AI assistant. Use the following context to answer the user's question.
-        If you cannot answer the question based on the context, say so and produce an answer that is as helpful as possible.
-        The user's question is in {query_lang}. Please respond in the same language.
+        You are an AI assistant specialized in the literary analysis of Richard Ste-Marie's works. Your task is to provide detailed and in-depth answers based on the given context. Follow these guidelines:
+
+            1. Carefully analyze all the provided excerpts.
+            2. Synthesize the information from multiple excerpts to form a coherent and detailed answer.
+            3. If the context contains information about specific characters, events, or concepts, elaborate on them.
+            4. Provide examples or explanations to support your points whenever possible.
+            5. If there are multiple perspectives or interpretations in the excerpts, discuss them.
+            6. If the excerpts do not contain enough information to fully answer the question, clearly indicate what is known and what remains uncertain.
+            7. Organize your response logically, using paragraphs to separate different points or aspects of the answer.
+            8. Aim for an answer of at least 150 words, but expand further if the information and question justify it.
+
+            Base your response primarily on the provided context. If you make inferences or connections beyond the given information, clearly state it.
 
         Context:
         {context}

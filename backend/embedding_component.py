@@ -1,15 +1,16 @@
 import ollama
 import torch
 from typing import List, Union
-from config import OLLAMA_BASE_URL, EMBEDDING_MODEL, BATCH_SIZE, EMBEDDING_DEVICE
+from config import OLLAMA_BASE_URL, EMBEDDING_MODEL, EMBEDDING_DIMENSION, BATCH_SIZE, EMBEDDING_DEVICE
 from loguru import logger
 
 class EmbeddingComponent:
     def __init__(self):
         self.client = ollama.Client(host=OLLAMA_BASE_URL)
         self.model = EMBEDDING_MODEL
+        self.dimension = EMBEDDING_DIMENSION
         self.device = torch.device(EMBEDDING_DEVICE if torch.cuda.is_available() else "cpu")
-        logger.info(f"Initialized EmbeddingComponent with model: {self.model} on device: {self.device}")
+        logger.info(f"Initialized EmbeddingComponent with model: {self.model}, dimension: {self.dimension} on device: {self.device}")
 
     def get_embeddings(self, texts: Union[str, List[str]]) -> torch.Tensor:
         if isinstance(texts, str):
@@ -34,12 +35,23 @@ class EmbeddingComponent:
                     raise KeyError("'embedding' key not found in API response")
 
                 embedding = response['embedding']
+                
+                if len(embedding) != self.dimension:
+                    logger.warning(f"Embedding dimension mismatch. Expected: {self.dimension}, Got: {len(embedding)}")
+                    # Adjust the embedding to match the expected dimension
+                    if len(embedding) < self.dimension:
+                        embedding += [0] * (self.dimension - len(embedding))
+                    else:
+                        embedding = embedding[:self.dimension]
+                
                 all_embeddings.append(embedding)
             except Exception as e:
                 logger.error(f"Error getting embedding for text: {str(e)}", exc_info=True)
                 raise
 
-        return torch.tensor(all_embeddings, device=self.device)
+        embeddings_tensor = torch.tensor(all_embeddings, device=self.device)
+        logger.info(f"Created embeddings tensor of shape {embeddings_tensor.shape}")
+        return embeddings_tensor
 
     def embed_documents(self, documents: List[str]) -> torch.Tensor:
         logger.info(f"Embedding {len(documents)} documents")
@@ -63,3 +75,5 @@ class EmbeddingComponent:
         """
         return torch.nn.functional.cosine_similarity(a, b, dim=-1)
 
+    def get_embedding_dim(self) -> int:
+        return self.dimension

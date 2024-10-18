@@ -1,3 +1,5 @@
+
+
 import os
 from typing import List, Dict, Any
 from pathlib import Path
@@ -8,9 +10,9 @@ import torch.multiprocessing as mp
 import magic
 import langdetect
 import shutil
+import numpy as np
 
 from config import (
-    CHROMA_PERSIST_DIRECTORY,
     CHROMA_COLLECTION_NAME,
     SUPPORTED_FILE_TYPES,
     CHUNK_SIZE,
@@ -52,29 +54,32 @@ class IngestComponent:
         except:
             return SUPPORTED_LANGUAGES[0]
 
-    def _batch_embed(self, chunks: List[str], device: torch.device) -> torch.Tensor:
+    def _batch_embed(self, chunks: List[str]) -> List[List[float]]:
         logger.debug(f"Starting batch embedding of {len(chunks)} chunks")
         all_embeddings = []
         for i in range(0, len(chunks), BATCH_SIZE):
             batch = chunks[i:i + BATCH_SIZE]
             logger.debug(f"Embedding batch {i//BATCH_SIZE + 1} of {len(chunks)//BATCH_SIZE + 1}")
-            with torch.no_grad():
-                embeddings = self.embedding_component.embed_documents(batch).to(device)
-            all_embeddings.append(embeddings)
-        result = torch.cat(all_embeddings, dim=0)
-        logger.debug(f"Batch embedding complete. Shape: {result.shape}")
-        return result
+            embeddings = self.embedding_component.embed_documents(batch)
+            # Ensure embeddings are on CPU and converted to Python lists
+            if isinstance(embeddings, torch.Tensor):
+                embeddings = embeddings.cpu().numpy().tolist()
+            elif isinstance(embeddings, np.ndarray):
+                embeddings = embeddings.tolist()
+            all_embeddings.extend(embeddings)
+        logger.debug(f"Batch embedding complete. Total embeddings: {len(all_embeddings)}")
+        return all_embeddings
 
-    def _batch_ingest(self, chunks, ids, metadatas, device):
+    def _batch_ingest(self, chunks, ids, metadatas):
         logger.debug(f"Starting batch ingest of {len(chunks)} chunks")
-        embeddings = self._batch_embed(chunks, device)
+        embeddings = self._batch_embed(chunks)
         try:
             lang = metadatas[0]["language"]
             collection = self.collections.get(lang, self.collections[SUPPORTED_LANGUAGES[0]])
             logger.debug(f"Adding to collection {collection.name}")
             collection.add(
                 ids=ids,
-                embeddings=embeddings.cpu().numpy().tolist(),
+                embeddings=embeddings,
                 documents=chunks,
                 metadatas=metadatas
             )
@@ -82,40 +87,46 @@ class IngestComponent:
         except Exception as e:
             logger.error(f"Failed to ingest batch: {e}", exc_info=True)
             raise
+        finally:
+            self.clear_cache()
 
-    def ingest_file(self, file_path: str, device: torch.device = None) -> Dict[str, Any]:
-        if device is None:
-            device = self.device
-        logger.info(f"Ingesting file {file_path} on device {device}")
+    def ingest_file(self, file_path: str) -> Dict[str, Any]:
+        logger.info(f"Ingesting file {file_path}")
 
-        file_path = Path(file_path)
-        if not file_path.exists():
-            logger.error(f"File not found: {file_path}")
-            raise FileNotFoundError(f"File not found: {file_path}")
+        try:
+            file_path = Path(file_path)
+            if not file_path.exists():
+                logger.error(f"File not found: {file_path}")
+                raise FileNotFoundError(f"File not found: {file_path}")
 
-        file_type = magic.from_file(str(file_path), mime=True)
-        if file_type not in SUPPORTED_FILE_TYPES:
-            logger.error(f"Unsupported file type: {file_type}")
-            raise ValueError(f"Unsupported file type: {file_type}")
+            file_type = magic.from_file(str(file_path), mime=True)
+            if file_type not in SUPPORTED_FILE_TYPES:
+                logger.error(f"Unsupported file type: {file_type}")
+                raise ValueError(f"Unsupported file type: {file_type}")
 
-        content = read_file(file_path)
-        logger.debug(f"File content read. Length: {len(content)}")
-        chunks = chunk_text(content, chunk_size=CHUNK_SIZE, chunk_overlap=CHUNK_OVERLAP)
-        logger.debug(f"Text chunked into {len(chunks)} parts")
-        metadata = get_file_metadata(file_path)
-        lang = self._detect_language(content)
-        logger.debug(f"Detected language: {lang}")
+            content = read_file(file_path)
+            logger.debug(f"File content read. Length: {len(content)}")
+            chunks = chunk_text(content, chunk_size=CHUNK_SIZE, chunk_overlap=CHUNK_OVERLAP)
+            logger.debug(f"Text chunked into {len(chunks)} parts")
+            metadata = get_file_metadata(file_path)
+            lang = self._detect_language(content)
+            logger.debug(f"Detected language: {lang}")
 
-        ids = [f"{file_path.stem}_{i}" for i in range(len(chunks))]
-        metadatas = [{**metadata, "chunk_index": i, "language": lang} for i in range(len(chunks))]
+            ids = [f"{file_path.stem}_{i}" for i in range(len(chunks))]
+            metadatas = [{**metadata, "chunk_index": i, "language": lang} for i in range(len(chunks))]
 
-        logger.debug("Starting batch ingest")
-        self._batch_ingest(chunks, ids, metadatas, device)
+            logger.debug("Starting batch ingest")
+            self._batch_ingest(chunks, ids, metadatas)
 
-        logger.info(f"Successfully ingested file {file_path}")
-        return {**metadata, "language": lang, "chunks_count": len(chunks)}
+            logger.info(f"Successfully ingested file {file_path}")
+            return {**metadata, "language": lang, "chunks_count": len(chunks)}
+        except Exception as e:
+            logger.error(f"Error ingesting file {file_path}: {str(e)}", exc_info=True)
+            raise
+        finally:
+            self.clear_cache()
 
-    def ingest_directory(self, directory_path: str, num_gpus: int) -> List[Dict[str, Any]]:
+    def ingest_directory(self, directory_path: str, num_gpus: int = 1) -> List[Dict[str, Any]]:
         directory_path = Path(directory_path)
         if not directory_path.is_dir():
             raise NotADirectoryError(f"Not a directory: {directory_path}")
@@ -125,14 +136,27 @@ class IngestComponent:
         file_paths = [file_path for file_path in directory_path.rglob("*") if file_path.is_file() and file_path.suffix.lower() in SUPPORTED_FILE_TYPES]
         logger.info(f"Found {len(file_paths)} files to ingest")
 
-        results = []
-        for file_path in tqdm(file_paths, desc="Ingesting files", unit="file"):
-            try:
-                result = self.ingest_file(str(file_path))
-                results.append(result)
-            except Exception as e:
-                logger.error(f"Error ingesting file {file_path}: {e}", exc_info=True)
-                results.append({"status": "failed", "file": str(file_path), "error": str(e)})
+        if num_gpus > 1 and torch.cuda.device_count() > 1:
+            # Multi-GPU processing
+            with mp.Pool(num_gpus) as pool:
+                results = list(tqdm(
+                    pool.imap(self.ingest_file, file_paths),
+                    total=len(file_paths),
+                    desc="Ingesting files",
+                    unit="file"
+                ))
+        else:
+            # Single GPU or CPU processing
+            results = []
+            for file_path in tqdm(file_paths, desc="Ingesting files", unit="file"):
+                try:
+                    result = self.ingest_file(str(file_path))
+                    results.append(result)
+                except Exception as e:
+                    logger.error(f"Error ingesting file {file_path}: {e}", exc_info=True)
+                    results.append({"status": "failed", "file": str(file_path), "error": str(e)})
+                finally:
+                    self.clear_cache()
 
         logger.info(f"Finished ingesting {len(file_paths)} files from {directory_path}")
         return results
@@ -167,7 +191,10 @@ class IngestComponent:
         for pycache_dir in Path(".").rglob("__pycache__"):
             try:
                 shutil.rmtree(pycache_dir)
-                logger.info(f"Cache {pycache_dir} supprimé avec succès.")
+                logger.info(f"Cache {pycache_dir} successfully emptied.")
             except Exception as e:
-                logger.error(f"Erreur lors de la suppression du cache {pycache_dir}: {e}", exc_info=True)
+                logger.error(f"Error deleting cache {pycache_dir}: {e}", exc_info=True)
 
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+            logger.info("GPU cache cleared.")
