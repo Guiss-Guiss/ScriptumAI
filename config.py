@@ -65,7 +65,7 @@ FLASK_PORT = 5001
 FLASK_DEBUG = False
 
 # Maximum file size for upload (in bytes)
-MAX_UPLOAD_SIZE = 1024**3 # 1 GB
+MAX_UPLOAD_SIZE = 2**30 # 1 GB
 
 # Supported file types for document ingestion
 SUPPORTED_FILE_TYPES = [
