@@ -8,10 +8,10 @@ beautifulsoup4
 markdown
 
 # Embedding and language model
-ollama  # Comment out for now, may need to be installed separately or from source
+ollama 
 
 # Vector database
-chromadb  # Comment out for now, may need to be installed separately or from source
+chromadb
 
 # Async support
 aiohttp
@@ -23,7 +23,7 @@ cachetools
 pytest
 pytest-asyncio
 
-# Code formatting and linting (optional, but recommended for development)
+# Code formatting and linting 
 black
 flake8
 
