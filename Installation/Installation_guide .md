@@ -44,7 +44,7 @@ curl https://ollama.ai/install.sh | sh
 ### For Windows:
 
 1. Visit https://github.com/jmorganca/ollama/releases
-2. Download and run the latest Windows installer (.msi file)
+2. Download and run the latest Windows installer
 
 Verify installation:
 
@@ -79,11 +79,11 @@ cd ScriptumAI
 2. Create a virtual environment:
 
 ```bash
-python -m venv scriptum
+python -m venv scriptum python=3.12
 ```
 Or
 ```bash
-python3 -m venv scriptum
+python3 -m venv scriptum pyhton=3.12
 ```
 
 3. Activate the virtual environment:
@@ -133,4 +133,4 @@ This will start the ScriptumAI application. You can access the user interface by
 - If you face problems with Ollama or model downloads, check your internet connection and firewall settings.
 - For any Python package installation issues, ensure you're using the correct version of pip within your virtual environment.
 
-If you continue to experience problems, please refer to the official documentation for each component or seek assistance in the ScriptumAI community forums.
+If you continue to experience problems, please refer to the official documentation for each component.
