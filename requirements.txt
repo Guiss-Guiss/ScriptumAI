@@ -1,0 +1,34 @@
+# Web application framework
+streamlit
+
+# Document processing
+PyPDF2
+python-docx
+beautifulsoup4
+markdown
+
+# Embedding and language model
+ollama  # Comment out for now, may need to be installed separately or from source
+
+# Vector database
+chromadb  # Comment out for now, may need to be installed separately or from source
+
+# Async support
+aiohttp
+
+# Caching
+cachetools
+
+# Testing
+pytest
+pytest-asyncio
+
+# Code formatting and linting (optional, but recommended for development)
+black
+flake8
+
+# Type checking (optional, but recommended for development)
+mypy
+
+# Language detection
+langdetect
