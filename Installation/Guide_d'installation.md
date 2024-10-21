@@ -69,7 +69,7 @@ ollama list
 
 ## 5. Configurer ScriptumAI
 
-1. Clonez le dépôt ScriptumAI (remplacez par l'URL réelle du dépôt) :
+1. Clonez le dépôt ScriptumAI :
 
 ```bash
 git clone https://github.com/Guiss-Guiss/ScriptumAI.git
@@ -79,11 +79,11 @@ cd ScriptumAI
 2. Créez un environnement virtuel :
 
 ```bash
-python -m venv scriptum
+python -m venv scriptum python=3.12
 ```
 Ou
 ```bash
-python3 -m venv scriptum
+python3 -m venv scriptum  python=3.12
 ```
 
 3. Activez l'environnement virtuel :
@@ -131,4 +131,4 @@ Cela lancera l'application ScriptumAI. Vous pouvez accéder à l'interface utili
 - Si vous rencontrez des problèmes avec Ollama ou le téléchargement des modèles, vérifiez votre connexion internet et les paramètres de votre pare-feu.
 - Pour tout problème d'installation de paquets Python, assurez-vous d'utiliser la bonne version de pip dans votre environnement virtuel.
 
-Si vous continuez à rencontrer des problèmes, veuillez consulter la documentation officielle de chaque composant ou demander de l'aide sur les forums de la communauté ScriptumAI.
+Si vous continuez à rencontrer des problèmes, veuillez consulter la documentation officielle de chaque composant.
