@@ -5,7 +5,6 @@ from embedding_component import EmbeddingComponent
 logger = logging.getLogger(__name__)
 
 def normalize_distance(distance, max_distance=1.0, min_distance=0.0):
-    """Normalise la distance pour obtenir une similarité."""
     return (distance - min_distance) / (max_distance - min_distance)
 
 class RetrievalComponent:
