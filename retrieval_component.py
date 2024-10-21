@@ -23,16 +23,13 @@ class RetrievalComponent:
                 logger.error("Failed to generate embedding for the query")
                 return []
 
-            # Exécution de la recherche de similarité
             results = self.chroma_db.similarity_search(query_embedding, n_results)
 
-            # Normalisation des distances et ajout de la similarité dans les résultats
             normalized_distances = [normalize_distance(dist) for dist in results['distances'][0]]
-            
-            # Ajouter la similarité aux résultats pour le filtrage basé sur le seuil de confiance
+
             documents_with_similarity = []
             for i, chunk in enumerate(results['documents'][0]):
-                chunk_similarity = 1 - normalized_distances[i]  # Convertir distance en similarité
+                chunk_similarity = 1 - normalized_distances[i]
                 documents_with_similarity.append({
                     'content': chunk,
                     'similarity_score': chunk_similarity,
