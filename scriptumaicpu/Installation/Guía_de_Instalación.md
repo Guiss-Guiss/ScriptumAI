@@ -64,7 +64,7 @@ ollama list
 1. Clona el repositorio de ScriptumAI:
 
 ```bash
-git clone https://github.com/Guiss-Guiss/ScriptumAICPU.git
+git clone https://github.com/Guiss-Guiss/ScriptumAI-CPU-.git
 cd ScriptumAI
 ```
 
