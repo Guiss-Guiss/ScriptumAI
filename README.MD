@@ -7,13 +7,6 @@
 ### Introduction
 ScriptumAI is a private and advanced Retrieval-Augmented Generation platform designed for document ingestion, semantic search, and query processing. It leverages cutting-edge machine learning and natural language processing techniques.
 
-### Key Technologies
-- **Backend**: Flask
-- **Frontend**: Streamlit
-- **ML & NLP**: PyTorch, Ollama API
-- **Database**: Chroma
-- **Testing**: pytest
-
 ### Architecture
 The project follows a modular architecture with distinct components for embedding, ingestion, query processing, and retrieval.s
 
@@ -64,13 +57,6 @@ Please read our [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of co
 ### Introduction
 ScriptumAI est une plateforme privée et avancée de Génération Augmentée par Récupération conçue pour l'ingestion de documents, la recherche sémantique et le traitement des requêtes. Elle utilise des techniques de pointe en apprentissage automatique et en traitement du langage naturel.
 
-### Technologies Clés
-- **Backend**: Flask
-- **Frontend**: Streamlit
-- **ML & NLP**: API Ollama
-- **Base de données**: Chroma
-- **Tests**: pytest
-
 ### Architecture
 Le projet suit une architecture modulaire avec des composants distincts pour l'intégration, l'ingestion, le traitement des requêtes et la récupération.
 
@@ -120,12 +106,6 @@ Veuillez lire notre [CONTRIBUTING.md](CONTRIBUTING.md) pour plus de détails sur
 
 ### Introducción
 ScriptumAI es una plataforma privado y avanzada de Generación Aumentada por Recuperación diseñada para la ingestión de documentos, búsqueda semántica y procesamiento de consultas. Utiliza técnicas de vanguardia en aprendizaje automático y procesamiento del lenguaje natural.
-
-### Tecnologías Clave
-- **Frontend**: Streamlit
-- **ML & NLP**:  API de Ollama
-- **Base de datos**: Chroma
-- **Pruebas**: pytest
 
 ### Arquitectura
 El proyecto sigue una arquitectura modular con componentes distintos para la incrustación, ingestión, procesamiento de consultas y recuperación.
