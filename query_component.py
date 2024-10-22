@@ -19,8 +19,10 @@ class QueryComponent:
         try:
             logger.info(f"Processing query: {query}")
 
+            # Basic query processing: strip whitespace and convert to lowercase
             processed_query = query.strip().lower()
 
+            # Prepare the result dictionary
             result = {
                 "original_query": query,
                 "processed_query": processed_query,

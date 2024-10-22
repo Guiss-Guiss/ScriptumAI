@@ -17,9 +17,11 @@ class RetrievalSystem:
         try:
             logger.info(get_translation("fetching_relevant_chunks").format(query=query))
             processed_query = self.query_component.process_query(query)
-
+            
+            # Récupérer les documents similaires
             results = await self.retrieval_component.retrieve_similar_documents(processed_query['processed_query'], n_results)
-
+            
+            # Filtrer les documents en fonction du seuil de similarité (confidence_threshold)
             filtered_chunks = [
                 chunk for chunk in results if chunk['similarity_score'] >= confidence_threshold
             ]

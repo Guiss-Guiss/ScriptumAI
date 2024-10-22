@@ -8,7 +8,7 @@ class ChromaDBComponent:
         self.persist_directory = persist_directory
         self.client = None
         self.collection = None
-        self.EMBEDDING_DIMENSION = 768 
+        self.EMBEDDING_DIMENSION = 768  # Set this to match nomic-embed-text
         self._initialize_client()
         self._create_collection()
 
@@ -23,11 +23,12 @@ class ChromaDBComponent:
         try:
             self.collection = self.client.get_or_create_collection(
                 name=collection_name,
-                metadata={"hnsw:space": "cosine"},
-                embedding_function=None
+                metadata={"hnsw:space": "cosine"},  # You can adjust this if needed
+                embedding_function=None  # We'll provide embeddings externally
             )
             logger.info(f"Collection '{collection_name}' created or retrieved successfully")
             
+            # Check and log the collection's dimensionality
             collection_info = self.collection.get()
             if collection_info['embeddings']:
                 dim = len(collection_info['embeddings'][0])
@@ -41,6 +42,7 @@ class ChromaDBComponent:
 
     def add_documents(self, ids, embeddings, metadatas, documents):
         try:
+            # Log pour s'assurer que tout est correctement formaté avant l'ajout
             logger.info(f"Adding {len(documents)} documents, {len(embeddings)} embeddings, and {len(metadatas)} metadata entries")
 
             if len(documents) != len(embeddings) or len(documents) != len(metadatas) or len(ids) != len(documents):
@@ -103,10 +105,12 @@ class ChromaDBComponent:
                 n_results=n_results
             )
 
+            # Vérification des résultats
             if 'ids' not in results or 'documents' not in results:
                 logger.error("Unexpected structure in results from ChromaDB")
                 return []
 
+            # Log des résultats pour analyser leur structure
             logger.info(f"Results: {results}")
 
             logger.info(f"Similarity search executed successfully, returned {len(results['ids'][0])} results")

@@ -78,7 +78,7 @@ python -m venv scriptum python=3.11
 
 - Sur Windows :
   ```
-  scriptum\Scripts\activate
+  scriptum\Scriptsctivate
   ```
 - Sur macOS et Linux :
   ```

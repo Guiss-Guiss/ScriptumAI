@@ -19,24 +19,29 @@ async def process_file(file_path, file_name, tracker):
     try:
         logger.info(get_translation("processing_file", lang).format(file_name=file_name))
         
+        # Traiter le document
         processed_content = process_document(file_path)
         if processed_content is None:
             logger.error(get_translation("failed_to_process", lang).format(file_name=file_name))
             return get_translation('file_processing_failed', lang).format(file_name=file_name)
         
+        # Gérer le cas des PDF (générateur) et des autres types de fichiers (chaîne de caractères)
         if isinstance(processed_content, str):
             chunks = chunk_text([processed_content])
-        else:
+        else:  # C'est un générateur (pour les PDF)
             chunks = chunk_text(processed_content)
         
+        # Convertir les chunks en liste pour pouvoir les compter et les utiliser
         chunks = list(chunks)
         logger.info(get_translation("text_chunked", lang).format(chunk_count=len(chunks)))
-
+        
+        # Générer les embeddings
         embeddings = await embedding_component.generate_embeddings_for_chunks(chunks)
         
         if embeddings and len(embeddings) > 0:
             logger.info(get_translation("embeddings_generated", lang).format(file_name=file_name))
             
+            # Ajouter à ChromaDB
             ids = [str(uuid.uuid4()) for _ in chunks]
             metadatas = [{"source": file_name} for _ in chunks]
             chroma_db.add_documents(ids, embeddings, metadatas, chunks)
@@ -69,7 +74,8 @@ async def file_uploader(uploaded_files):
     for uploaded_file in uploaded_files:
         file_name = uploaded_file.name
         file_path = os.path.join("uploads", file_name)
-
+        
+        # Save uploaded file
         with open(file_path, "wb") as f:
             f.write(uploaded_file.getbuffer())
         
