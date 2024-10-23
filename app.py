@@ -20,7 +20,6 @@ logger.info("Script started")
 
 init_session_state()
 
-# Function to load user preferences
 def load_preferences():
     if os.path.exists('user_preferences.json'):
         with open('user_preferences.json', 'r') as f:
@@ -29,7 +28,6 @@ def load_preferences():
         return prefs
     return {'n_results': 5, 'confidence_threshold': 0.7, 'language': 'en'}
 
-# Function to save user preferences
 def save_preferences(preferences):
     with open('user_preferences.json', 'w') as f:
         json.dump(preferences, f)
@@ -42,10 +40,8 @@ async def main():
         st.title(get_translation("title"))
         logger.info(get_translation("app_started"))
 
-        # Load user preferences
         preferences = load_preferences()
 
-        # Initialize components
         try:
             chroma_db = ChromaDBComponent()
             embedding_component = EmbeddingComponent()
@@ -59,7 +55,6 @@ async def main():
             logger.error(f"Component initialization error: {str(e)}", exc_info=True)
             return
 
-        # Sidebar for navigation and settings
         st.sidebar.title(get_translation("navigation"))
         page = st.sidebar.radio(get_translation("go_to"), [
             get_translation("upload"),
@@ -69,7 +64,6 @@ async def main():
         ])
 
         if page == get_translation("upload"):
-            # File upload section
             st.header(get_translation("document_upload"))
             uploaded_files = st.file_uploader(get_translation("choose_files"), accept_multiple_files=True, type=['txt', 'pdf', 'docx', 'html', 'md'])
 
@@ -89,11 +83,9 @@ async def main():
                 logger.info(get_translation("no_files_uploaded"))
 
         elif page == get_translation("search"):
-            # Search interface
             st.header(get_translation("search_qa"))
             query = st.text_input(get_translation("enter_query"))
             
-            # Add sliders for adjusting search parameters
             n_results = st.slider(get_translation("num_results"), 1, 100, preferences['n_results'])
             confidence_threshold = st.slider(get_translation("confidence_threshold"), 0.0, 1.0, preferences['confidence_threshold'])
 
@@ -126,7 +118,6 @@ async def main():
                     logger.error(f"Query processing error: {str(e)}", exc_info=True)
 
         elif page == get_translation("manage_documents"):
-            # Document management interface
             render_document_management(document_manager)
 
         elif page == get_translation("settings"):
@@ -159,7 +150,6 @@ async def main():
                 save_preferences(new_preferences)
                 st.success(get_translation("preferences_saved"))
                 
-                # Afficher le message de rafraîchissement
                 st.info(get_translation("refresh_to_apply"))                
     except Exception as e:
         st.error(get_translation("unexpected_error").format(error=str(e)))

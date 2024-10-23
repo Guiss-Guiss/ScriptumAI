@@ -34,6 +34,12 @@ class DocumentManager:
 def render_document_management(document_manager):
     st.header(get_translation("document_management"))
 
+    # Initialize session state for confirmation dialog
+    if 'delete_confirmation' not in st.session_state:
+        st.session_state.delete_confirmation = False
+    if 'file_to_delete' not in st.session_state:
+        st.session_state.file_to_delete = None
+
     try:
         files = document_manager.list_files()
         if files:
@@ -43,15 +49,40 @@ def render_document_management(document_manager):
                 with col1:
                     st.write(file_name)
                 with col2:
+                    # When delete button is clicked, store the file name and show confirmation
                     if st.button(get_translation("delete"), key=f"delete_{file_name}"):
-                        if st.button(get_translation("confirm_delete"), key=f"confirm_delete_{file_name}"):
-                            try:
-                                document_manager.delete_file(file_name)
-                                st.success(get_translation("file_deleted").format(file_name=file_name))
-                                st.rerun()
-                            except Exception as e:
-                                st.error(get_translation("delete_failed").format(file_name=file_name, error=str(e)))
+                        st.session_state.delete_confirmation = True
+                        st.session_state.file_to_delete = file_name
+                        st.rerun()
                 st.markdown("---")
+
+            # Show confirmation dialog if delete was clicked
+            if st.session_state.delete_confirmation:
+                confirm = st.warning(
+                    f"{get_translation('confirm_delete_message')} {st.session_state.file_to_delete}?",
+                    icon="⚠️"
+                )
+                col1, col2 = st.columns([1, 1])
+                with col1:
+                    if st.button(get_translation("yes_delete"), key="confirm_yes"):
+                        try:
+                            document_manager.delete_file(st.session_state.file_to_delete)
+                            st.success(get_translation("file_deleted").format(
+                                file_name=st.session_state.file_to_delete))
+                            # Reset the state
+                            st.session_state.delete_confirmation = False
+                            st.session_state.file_to_delete = None
+                            st.rerun()
+                        except Exception as e:
+                            st.error(get_translation("delete_failed").format(
+                                file_name=st.session_state.file_to_delete, 
+                                error=str(e)))
+                with col2:
+                    if st.button(get_translation("cancel"), key="confirm_no"):
+                        st.session_state.delete_confirmation = False
+                        st.session_state.file_to_delete = None
+                        st.rerun()
+
         else:
             st.info(get_translation("no_files_found"))
     except Exception as e:
