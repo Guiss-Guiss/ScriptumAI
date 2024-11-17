@@ -14,20 +14,16 @@ def check_and_install_rust():
         cargo_result = subprocess.run(["cargo", "--version"], check=True, capture_output=True, text=True)
         logger.info(f"Cargo is already installed: {cargo_result.stdout.strip()}")
 
-        # Log the current PATH
         logger.info(f"Current PATH: {os.environ['PATH']}")
     except (subprocess.CalledProcessError, FileNotFoundError) as e:
         logger.error(f"Error checking Rust/Cargo: {e}")
         logger.info("Rust is not installed. Attempting to install...")
         try:
             if sys.platform.startswith('win'):
-                # For Windows
                 subprocess.run(["curl", "--proto", "=https", "--tlsv1.2", "-sSf", "https://sh.rustup.rs", "|", "sh"], check=True)
             else:
-                # For Unix-like systems
                 subprocess.run(["curl", "--proto", "=https", "--tlsv1.2", "-sSf", "https://sh.rustup.rs", "|", "sh", "-s", "--", "-y"], check=True)
             logger.info("Rust installed successfully")
-            # Update PATH to include Cargo bin directory
             os.environ["PATH"] += os.pathsep + os.path.expanduser("~/.cargo/bin")
         except subprocess.CalledProcessError as install_error:
             logger.error(f"Failed to install Rust. Please install manually from https://www.rust-lang.org/tools/install: {install_error}", exc_info=True)

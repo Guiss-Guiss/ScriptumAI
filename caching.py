@@ -1,5 +1,5 @@
 import functools
-from cachetools import TTLCache, LRUCache
+from cachetools import TTLCache
 import logging
 
 logger = logging.getLogger(__name__)

@@ -2,9 +2,9 @@ import logging
 import ollama
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
-from language_utils import get_translation, get_current_language
+from language_utils import get_translation
 from langdetect import detect
-from functools import partial
+
 
 logger = logging.getLogger(__name__)
 

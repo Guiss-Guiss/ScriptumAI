@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 def get_optimal_thread_count():
     num_cores = multiprocessing.cpu_count()
-    return max(2, num_cores * 2)  # Optimiser pour le CPU
+    return max(2, num_cores * 2)
 
 class EmbeddingComponent:
     def __init__(self):
@@ -44,7 +44,6 @@ class EmbeddingComponent:
         logger.info(f"Generating embeddings for {len(chunks)} chunks using {self.num_threads} threads in batches of {batch_size}")
         embeddings = []
         
-        # Traiter les chunks en batchs pour réduire la charge sur CPU
         for i in range(0, len(chunks), batch_size):
             batch = chunks[i:i+batch_size]
             tasks = [self.generate_embedding(chunk) for chunk in batch]
