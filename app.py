@@ -103,7 +103,6 @@ async def main():
                             
                             st.subheader(get_translation("generated_answer"))
                             st.write(answer)
-                            st.info(get_translation("answer_language_note"))
                             
                             st.subheader(get_translation("relevant_chunks"))
                             for i, chunk in enumerate(filtered_chunks, 1):
