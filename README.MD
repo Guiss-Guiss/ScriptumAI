@@ -50,7 +50,7 @@ pytest
 #### Installation
 ```bash
 # Clone the repository
-git clone https://github.com/Guiss-Guiss/scriptumai.git
+git clone https://github.com/Guiss-Guiss/ScriptumAI.git
 
 # Create a virtual environment
 python -m venv venv
@@ -113,7 +113,7 @@ pytest
 #### Installation
 ```bash
 # Cloner le dépôt
-git clone https://github.com/Guiss-Guiss/scriptumai.git
+git clone https://github.com/Guiss-Guiss/ScriptumAI.git
 
 # Créer un environnement virtuel
 python -m venv venv
@@ -176,7 +176,7 @@ pytest
 #### Instalación
 ```bash
 # Clonar el repositorio
-git clone https://github.com/Guiss-Guiss/scriptumai.git
+git clone https://github.com/Guiss-Guiss/ScriptumAI.git
 
 # Crear un entorno virtual
 python -m venv venv
