@@ -1,5 +1,5 @@
 
-# ScriptumAI Guide d'installation complet
+# ScriptumAI | Guide d'installation complet
 
 Ce guide vous guidera tout au long du processus d'installation de ScriptumAI, y compris tous les prérequis et composants nécessaires.
 
