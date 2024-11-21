@@ -6,7 +6,7 @@
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 
 
-[English](#english) | [Français](#français) | [Español](#español)
+[English](#-english) | [Français](#-français) | [Español](#-español)
 
 </div>
 
