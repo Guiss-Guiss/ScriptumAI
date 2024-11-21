@@ -1,56 +1,79 @@
-# ScriptumAI
+# 🤖 ScriptumAI
 
-[English] | [Français] | [Español]
+<div align="center">
 
-## English
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](LICENSE)
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-### Introduction
+[English](#english) | [Français](#français) | [Español](#español)
+
+</div>
+
+---
+
+## 🌍 English
+
+### 🎯 Introduction
 ScriptumAI is a private and advanced Retrieval-Augmented Generation platform designed for document ingestion, semantic search, and query processing. It leverages cutting-edge machine learning and natural language processing techniques.
 
-### Architecture
-The project follows a modular architecture with distinct components for embedding, ingestion, query processing, and retrieval.s
+### 🏗️ Architecture
+The project follows a modular architecture with distinct components for embedding, ingestion, query processing, and retrieval.
 
-### Key Features
+### ✨ Key Features
 
-1. **Document Ingestion**
-   - Multi-format support (text, PDF, DOCX, HTML, Markdown)
-   - Chunking for efficient processing
-   - Storage in Chroma for fast retrieval
+#### 📚 Document Ingestion
+- 📄 Multi-format support (text, PDF, DOCX, HTML, Markdown)
+- 🔄 Chunking for efficient processing
+- 💾 Storage in Chroma for fast retrieval
 
-2. **Query Processing**
-   - Uses LLM to generate relevant responses
-   - Context-based retrieval using cosine similarity
+#### 🔍 Query Processing
+- 🧠 Uses LLM to generate relevant responses
+- 📊 Context-based retrieval using cosine similarity
 
-3. **User Interface**
-   - Components for ingestion, queries, and search
+#### 🖥️ User Interface
+- 🛠️ Components for ingestion, queries, and search
+- 📈 Dashboard for statistics and activity
 
-
-4. **Unit Testing**
-   - Comprehensive tests for all major components
-
-### Quick Start
+### 🚀 Quick Start
 
 #### Prerequisites
-Python 3.8+ (tested with 3.11), Flask, Streamlit, Ollama API, Chroma, pytest
+```
+Python 3.8+ (tested with 3.11)
+Flask
+Streamlit
+Ollama API
+Chroma
+pytest
+```
 
-#### Installation and Launch
-1. Clone the repository
-2. Create a virtual environment
-3. Install dependencies: `pip install -r requirements.txt`
-5. Launch frontend in a terminal: `streamlit run app.py`
+#### Installation
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/scriptum-ai.git
 
-### License
+# Create a virtual environment
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
 
+# Install dependencies
+pip install -r requirements.txt
+
+# Launch frontend
+streamlit run app.py
+```
+
+### 📜 License
 This project is available under a dual license:
+- GNU Affero General Public License v3.0 (AGPL-3.0)
+- Commercial License
 
-1. GNU Affero General Public License v3.0 (AGPL-3.0)
-2. Commercial License
+See [LICENSE](LICENSE) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md) for details.
 
-For more details, see the [LICENSE](LICENSE) file and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md).
-
-### Contributing
-
+### 👥 Contributing
 Please read our [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
+
+---
 
 ## Français
 
