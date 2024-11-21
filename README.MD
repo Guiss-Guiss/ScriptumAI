@@ -15,7 +15,7 @@
 ## 🌍 English
 
 ### 🎯 Introduction
-ScriptumAI is a private and advanced Retrieval-Augmented Generation platform designed for document ingestion, semantic search, and query processing. It leverages cutting-edge machine learning and natural language processing techniques.
+ScriptumAI is a private and advanced Retrieval-Augmented Generation platform designed for document ingestion, and query processing. It leverages cutting-edge machine learning and natural language processing techniques.
 
 ### 🏗️ Architecture
 The project follows a modular architecture with distinct components for embedding, ingestion, query processing, and retrieval.
@@ -50,7 +50,7 @@ pytest
 #### Installation
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/scriptum-ai.git
+git clone https://github.com/Guiss-Guiss/scriptumai.git
 
 # Create a virtual environment
 python -m venv venv
@@ -102,7 +102,7 @@ Le projet suit une architecture modulaire avec des composants distincts pour l'i
 
 #### Prérequis
 ```
-Python 3.8+ (testé sur 3.11)
+Python 3.8+ (testé sur 3.13)
 Flask
 Streamlit
 API Ollama
@@ -113,7 +113,7 @@ pytest
 #### Installation
 ```bash
 # Cloner le dépôt
-git clone https://github.com/yourusername/scriptum-ai.git
+git clone https://github.com/Guiss-Guiss/scriptumai.git
 
 # Créer un environnement virtuel
 python -m venv venv
@@ -165,7 +165,7 @@ El proyecto sigue una arquitectura modular con componentes distintos para la inc
 
 #### Requisitos Previos
 ```
-Python 3.8+ (probado en 3.11)
+Python 3.8+ (probado en 3.13)
 Flask
 Streamlit
 API de Ollama
@@ -176,7 +176,7 @@ pytest
 #### Instalación
 ```bash
 # Clonar el repositorio
-git clone https://github.com/yourusername/scriptum-ai.git
+git clone https://github.com/Guiss-Guiss/scriptumai.git
 
 # Crear un entorno virtual
 python -m venv venv
