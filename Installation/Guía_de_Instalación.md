@@ -1,5 +1,5 @@
 
-# ScriptumAI (versión CPU) Guía de instalación completa
+# ScriptumAI | Guía de instalación completa
 
 Esta guía te guiará a través de todo el proceso de configuración de ScriptumAI, incluidos todos los prerrequisitos y componentes necesarios.
 
