@@ -51,9 +51,10 @@ pytest
 ```bash
 # Clone the repository
 git clone https://github.com/Guiss-Guiss/ScriptumAI.git
+cd SriptumAI
 
 # Create a virtual environment
-python -m venv venv
+python -m venv .venv
 source venv/bin/activate  # Windows: venv\Scripts\activate
 
 # Install dependencies
