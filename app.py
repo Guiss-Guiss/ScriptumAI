@@ -5,6 +5,7 @@ from file_uploader import file_uploader
 from chroma_db_component import ChromaDBComponent
 from embedding_component import EmbeddingComponent
 from retrieval_component import RetrievalComponent
+from model_selector import render_model_selector
 from query_component import QueryComponent
 from retrieval_system import RetrievalSystem
 from rag_component import RAGComponent
@@ -84,9 +85,18 @@ async def main():
 
         elif page == get_translation("search"):
             st.header(get_translation("search_qa"))
+            
+            # Add model selector - now synchronous
+            selected_model = render_model_selector()
+            
+            # Initialize RAG component with selected model
+            if 'rag_component' not in st.session_state or st.session_state.current_model != selected_model:
+                st.session_state.rag_component = RAGComponent(model_name=selected_model)
+                st.session_state.current_model = selected_model
+            
             query = st.text_input(get_translation("enter_query"))
             
-            n_results = st.slider(get_translation("num_results"), 1, 100, preferences['n_results'])
+            n_results = st.slider(get_translation("num_results"), 1, 1000, preferences['n_results'])
             confidence_threshold = st.slider(get_translation("confidence_threshold"), 0.0, 1.0, preferences['confidence_threshold'])
 
             search_button = st.button(get_translation("search_answer"))
@@ -99,7 +109,7 @@ async def main():
                         filtered_chunks = [chunk for chunk in relevant_chunks if isinstance(chunk, dict) and chunk.get('similarity_score', 0) >= confidence_threshold]
                         
                         if filtered_chunks:
-                            answer = await rag_component.generate_answer(query, filtered_chunks)
+                            answer = await st.session_state.rag_component.generate_answer(query, filtered_chunks)
                             
                             st.subheader(get_translation("generated_answer"))
                             st.write(answer)
@@ -115,7 +125,7 @@ async def main():
                 except Exception as e:
                     st.error(get_translation("query_processing_error").format(error=str(e)))
                     logger.error(f"Query processing error: {str(e)}", exc_info=True)
-
+        
         elif page == get_translation("manage_documents"):
             render_document_management(document_manager)
 

@@ -3,11 +3,15 @@
 This guide will walk you through the entire process of setting up ScriptumAI, including all prerequisites and necessary components.
 
 ## Table of Contents
-1. [Install Python 11](#1-install-python-11)
-2. [Install Ollama](#2-install-ollama)
-4. [Pull Required Models](#4-pull-required-models)
-5. [Set Up ScriptumAI](#5-set-up-scriptum-ai)
-6. [Run ScriptumAI](#6-run-scriptum-ai)
+- [ScriptumAI | Complete Installation Guide](#scriptumai--complete-installation-guide)
+  - [Table of Contents](#table-of-contents)
+  - [1. Install Python 11](#1-install-python-11)
+  - [2. Install Ollama](#2-install-ollama)
+    - [For macOS and Linux:](#for-macos-and-linux)
+    - [For Windows:](#for-windows)
+  - [3. Pull Required Models](#3-pull-required-models)
+  - [5. Run ScriptumAI](#5-run-scriptumai)
+  - [Troubleshooting](#troubleshooting)
 
 ## 1. Install Python 11
 
@@ -44,11 +48,11 @@ ollama --version
 
 ## 3. Pull Required Models
 
-Pull the necessary models for ScriptumAI :
+Pull the necessary models for ScriptumAI : https://ollama.com/search for the list.
 
 ```bash
-ollama pull llama3.1:latest
-ollama pull nomic-embed-text
+ollama pull llama3.1:latest  # This is an example. You can download more than one model.
+ollama pull nomic-embed-text # Required.
 ```
 
 Verify models are installed:

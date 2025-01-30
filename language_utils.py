@@ -152,6 +152,11 @@ translations = {
         'warning_message': 'Deleting a file removes all associated documents and their embeddings from the database. This action cannot be undone.',
         'generating_embeddings': "Generating embeddings: {processed}/{total} chunks",
         'chunks': "chunks",
+        "select_model": "Select Model", 
+        'model_not_found_error': "The selected model '{model}' was not found. Please check if it's installed in Ollama.",
+        'model_change_success': "Successfully changed to model: {model}",
+        'model_change_error': "Error changing to model: {model}. {error}",
+        'no_models_available': "No models available in Ollama. Please install at least one model.",
     },
     'es': {
         'title': "ScriptumAI",
@@ -312,7 +317,11 @@ translations = {
         'warning': 'Advertencia',
         'generating_embeddings': "Generando embeddings: {processed}/{total} fragmentos",
         'chunks': "fragmentos",
-    
+        "select_model": "Seleccionar Modelo",
+        'model_not_found_error': "No se encontró el modelo seleccionado '{model}'. Por favor, verifique si está instalado en Ollama.",
+        'model_change_success': "Cambio exitoso al modelo: {model}",
+        'model_change_error': "Error al cambiar al modelo: {model}. {error}",
+        'no_models_available': "No hay modelos disponibles en Ollama. Por favor, instale al menos un modelo.",
     },
     'fr': {
         'title': "ScriptumAI",
@@ -465,6 +474,11 @@ translations = {
         'warning_message': 'La suppression d\'un fichier supprime tous les documents associés et leurs embeddings de la base de données. Cette action ne peut pas être annulée.',
         'generating_embeddings': "Génération des embeddings : {processed}/{total} fragments",
         'chunks': "fragments",
+        'select_model': "Sélectionner un modèle",
+        'model_not_found_error': "Le modèle sélectionné '{model}' n'a pas été trouvé. Veuillez vérifier s'il est installé dans Ollama.",
+        'model_change_success': "Changement réussi vers le modèle : {model}",
+        'model_change_error': "Erreur lors du changement vers le modèle : {model}. {error}",
+        'no_models_available': "Aucun modèle disponible dans Ollama. Veuillez installer au moins un modèle.",
     }
 }    
 
