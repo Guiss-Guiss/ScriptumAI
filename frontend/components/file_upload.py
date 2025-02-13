@@ -53,7 +53,7 @@ def ingest_file(file, lang: str) -> bool:
 
 
 def check_ingestion_status(task_id: str, file_name: str, lang: str) -> bool:
-    max_retries = 10
+    max_retries = 60
     retry_count = 0
 
     with requests.Session() as session:
