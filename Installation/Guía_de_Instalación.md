@@ -54,7 +54,7 @@ ollama --version
 Descarga los modelos necesarios para ScriptumAI: https://ollama.com/search
 
 ```bash
-ollama pull llama3.1:latest  # Este es un ejemplo. Puedes descargar más de un modelo.
+ollama pull llama3.2  # Este es un ejemplo. Puedes descargar más de un modelo.
 ollama pull nomic-embed-text # Necesario.
 ```
 
