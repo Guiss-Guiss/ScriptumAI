@@ -1,34 +1,54 @@
-# Web application framework
+# Core dependencies
+ollama
+chromadb==0.4.15
+langchain
+pydantic
+
+# PyTorch for tensor operations and potential GPU acceleration
+torch
+
+# File processing
+python-magic
+beautifulsoup4
+Pillow
+
+# Web framework for API
+Flask
+
+# Frontend
 streamlit
+
+# Utility libraries
+requests
+tqdm
 
 # Document processing
 PyPDF2
 python-docx
-beautifulsoup4
 markdown
-
-# Embedding and language model
-ollama  # Comment out for now, may need to be installed separately or from source
-
-# Vector database
-chromadb  # Comment out for now, may need to be installed separately or from source
-
-# Async support
-aiohttp
-
-# Caching
-cachetools
 
 # Testing
 pytest
-pytest-asyncio
 
-# Code formatting and linting (optional, but recommended for development)
+# Type checking
+mypy
+
+# Code formatting
 black
+
+# Linting
 flake8
 
-# Type checking (optional, but recommended for development)
-mypy
+# Logging
+loguru
+
+# Translation
+translations
+
+# Data visualization
+wordcloud
+matplotlib
 
 # Language detection
 langdetect
+

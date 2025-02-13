@@ -1,174 +1,135 @@
-import streamlit as st
-import json
-import os
-from file_uploader import file_uploader
-from chroma_db_component import ChromaDBComponent
-from embedding_component import EmbeddingComponent
-from retrieval_component import RetrievalComponent
-from model_selector import render_model_selector
-from query_component import QueryComponent
-from retrieval_system import RetrievalSystem
-from rag_component import RAGComponent
-from document_management import DocumentManager, render_document_management
-from language_utils import get_translation, init_session_state, change_language, get_current_language
-import asyncio
-import logging
+"""
+RAG Application ScriptumAI
+Copyright (C) 2024 Guillaume Ste-Marie
 
-logging.basicConfig(level=logging.INFO)
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+"""
+
+import streamlit as st
+import requests
+import logging
+import sys
+import os
+
+from frontend.components.system_health import render_system_health
+from frontend.components.system_logs import render_system_logs
+from frontend.components.file_upload import render_file_upload
+from frontend.components.results_display import render_results
+from frontend.config import API_BASE_URL
+from frontend.translations import get_text
+from frontend.language_utils import render_language_selector, get_user_language
+
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-logger.info("Script started")
+logger.debug(f"Current Python path in app.py: {sys.path}")
+logger.debug(f"Current working directory: {os.getcwd()}")
 
-init_session_state()
+st.set_page_config(page_title="ScriptumAI", page_icon="📚", layout="wide")
 
-def load_preferences():
-    if os.path.exists('user_preferences.json'):
-        with open('user_preferences.json', 'r') as f:
-            prefs = json.load(f)
-        change_language(prefs.get('language', 'en'))
-        return prefs
-    return {'n_results': 5, 'confidence_threshold': 0.7, 'language': 'en'}
+current_lang = get_user_language()
 
-def save_preferences(preferences):
-    with open('user_preferences.json', 'w') as f:
-        json.dump(preferences, f)
-    change_language(preferences['language'])
+menu_items = [
+    "home",
+    "ingest_documents",
+    "query",
+    "semantic_search",
+    "system_statistics",
+    "system_health",
+    "system_logs"
+]
+translated_menu = [get_text(item, current_lang) for item in menu_items]
 
-async def main():
-    current_language = get_current_language()
-    try:
-        logger.info("Entering main function")
-        st.title(get_translation("title"))
-        logger.info(get_translation("app_started"))
+choice = st.sidebar.selectbox(get_text("menu", current_lang), translated_menu)
 
-        preferences = load_preferences()
+st.title(get_text("app_title", current_lang))
 
-        try:
-            chroma_db = ChromaDBComponent()
-            embedding_component = EmbeddingComponent()
-            retrieval_component = RetrievalComponent(chroma_db, embedding_component)
-            query_component = QueryComponent()
-            retrieval_system = RetrievalSystem(retrieval_component, query_component)
-            rag_component = RAGComponent()
-            document_manager = DocumentManager(chroma_db)
-        except Exception as e:
-            st.error(get_translation("component_init_error").format(error=str(e)))
-            logger.error(f"Component initialization error: {str(e)}", exc_info=True)
-            return
+choice_key = menu_items[translated_menu.index(choice)]
 
-        st.sidebar.title(get_translation("navigation"))
-        page = st.sidebar.radio(get_translation("go_to"), [
-            get_translation("upload"),
-            get_translation("search"),
-            get_translation("manage_documents"),
-            get_translation("settings")
-        ])
+if choice_key == "home":
+    render_language_selector(get_text)
+    st.subheader(get_text("welcome_message", current_lang))
+    st.write(get_text("navigation_instruction", current_lang))
 
-        if page == get_translation("upload"):
-            st.header(get_translation("document_upload"))
-            uploaded_files = st.file_uploader(get_translation("choose_files"), accept_multiple_files=True, type=['txt', 'pdf', 'docx', 'html', 'md'])
+elif choice_key == "ingest_documents":
+    render_file_upload(["txt", "pdf", "docx", "md"], current_lang)
 
-            if uploaded_files:
-                try:
-                    logger.info(get_translation("files_uploaded").format(files=", ".join([file.name for file in uploaded_files])))
-                    st.info(get_translation("processing_files"))
-                    results = await file_uploader(uploaded_files)
-                    for result in results:
-                        st.write(result)
-                    st.success(get_translation("files_processed"))
-                    logger.info(get_translation("file_processing_completed"))
-                except Exception as e:
-                    st.error(get_translation("file_processing_error").format(error=str(e)))
-                    logger.error(f"File processing error: {str(e)}", exc_info=True)
-            else:
-                logger.info(get_translation("no_files_uploaded"))
-
-        elif page == get_translation("search"):
-            st.header(get_translation("search_qa"))
-            
-            # Add model selector - now synchronous
-            selected_model = render_model_selector()
-            
-            # Initialize RAG component with selected model
-            if 'rag_component' not in st.session_state or st.session_state.current_model != selected_model:
-                st.session_state.rag_component = RAGComponent(model_name=selected_model)
-                st.session_state.current_model = selected_model
-            
-            query = st.text_input(get_translation("enter_query"))
-            
-            n_results = st.slider(get_translation("num_results"), 1, 1000, preferences['n_results'])
-            confidence_threshold = st.slider(get_translation("confidence_threshold"), 0.0, 1.0, preferences['confidence_threshold'])
-
-            search_button = st.button(get_translation("search_answer"))
-
-            if search_button and query:
-                try:
-                    with st.spinner(get_translation("searching")):
-                        relevant_chunks = await retrieval_system.fetch_relevant_chunks(query, n_results)
-                        
-                        filtered_chunks = [chunk for chunk in relevant_chunks if isinstance(chunk, dict) and chunk.get('similarity_score', 0) >= confidence_threshold]
-                        
-                        if filtered_chunks:
-                            answer = await st.session_state.rag_component.generate_answer(query, filtered_chunks)
-                            
-                            st.subheader(get_translation("generated_answer"))
-                            st.write(answer)
-                            
-                            st.subheader(get_translation("relevant_chunks"))
-                            for i, chunk in enumerate(filtered_chunks, 1):
-                                with st.expander(f"{get_translation('chunk')} {i}"):
-                                    st.write(f"{get_translation('chunk_content')} {chunk['content'][:200]}...")
-                                    st.write(f"{get_translation('chunk_similarity')} {chunk['similarity_score']:.2f}")
-                                    st.write(f"{get_translation('chunk_metadata')} {chunk['metadata']}")
-                        else:
-                            st.warning(get_translation("no_relevant_docs"))
-                except Exception as e:
-                    st.error(get_translation("query_processing_error").format(error=str(e)))
-                    logger.error(f"Query processing error: {str(e)}", exc_info=True)
-        
-        elif page == get_translation("manage_documents"):
-            render_document_management(document_manager)
-
-        elif page == get_translation("settings"):
-            st.header(get_translation("user_preferences"))
-            
-            language_names = {
-                "en": "English",
-                "fr": "Français",
-                "es": "Español"
-            }
-            
-            current_language = get_current_language()
-            
-            selected_language = st.selectbox(
-                get_translation("language_selection"),
-                options=list(language_names.keys()),
-                format_func=lambda x: language_names[x],
-                index=list(language_names.keys()).index(current_language)
-            )
-            
-            new_n_results = st.slider(get_translation("default_number_of_results"), 1, 100, preferences['n_results'])
-            new_confidence_threshold = st.slider(get_translation("default_confidence_threshold"), 0.0, 1.0, preferences['confidence_threshold'])
-            
-            if st.button(get_translation("save_preferences")):
-                new_preferences = {
-                    'n_results': new_n_results, 
-                    'confidence_threshold': new_confidence_threshold,
-                    'language': selected_language
-                }
-                save_preferences(new_preferences)
-                st.success(get_translation("preferences_saved"))
+elif choice_key == "query":
+    st.header(get_text("process_query", current_lang))
+    query = st.text_input(get_text("enter_query", current_lang))
+    if st.button(get_text("process_query", current_lang)):
+        with st.spinner(get_text("processing_query", current_lang)):
+            try:
+                response = requests.post(
+                    f"{API_BASE_URL}/api/query",
+                    json={"query": query},
+                    headers={"Content-Type": "application/json"}
+                )
+                logger.debug(f"API Response status: {response.status_code}")
+                logger.debug(f"API Response content: {response.text[:200]}...")
                 
-                st.info(get_translation("refresh_to_apply"))                
-    except Exception as e:
-        st.error(get_translation("unexpected_error").format(error=str(e)))
-        logger.error(f"Unexpected error in main function: {str(e)}", exc_info=True)
+                if response.status_code == 200:
+                    result = response.json()
+                    render_results("query", result, current_lang)
+                else:
+                    error_msg = response.json().get('error', 'Unknown error occurred') if response.content else 'Empty response'
+                    st.error(get_text("error_processing_query", current_lang).format(error_msg))
+            except requests.RequestException as e:
+                logger.error(f"Network error while processing query: {e}", exc_info=True)
+                st.error(get_text("network_error", current_lang).format(str(e)))
 
-if __name__ == "__main__":
-    try:
-        logger.info(get_translation("starting_app"))
-        asyncio.run(main())
-        logger.info(get_translation("app_completed"))
-    except Exception as e:
-        st.error(get_translation("app_runtime_error", error=str(e)))
-        logger.error(f"Application runtime error: {str(e)}", exc_info=True)
+elif choice_key == "semantic_search":
+    st.header(get_text("semantic_search", current_lang))
+    query = st.text_input(get_text("enter_search_query", current_lang))
+    k = st.slider(get_text("number_of_results", current_lang), min_value=1, max_value=20, value=5)
+    if st.button(get_text("search", current_lang)):
+        with st.spinner(get_text("searching", current_lang)):
+            try:
+                response = requests.post(f"{API_BASE_URL}/search", json={"query": query, "k": k})
+                if response.status_code == 200:
+                    results = response.json()
+                    render_results("search", results, current_lang)
+                else:
+                    st.error(get_text("error_performing_search", current_lang).format(response.json().get('error', 'Unknown error occurred')))
+            except requests.RequestException as e:
+                logger.error(f"Network error while performing search: {e}", exc_info=True)
+                st.error(get_text("network_error", current_lang).format(str(e)))
+
+elif choice_key == "system_statistics":
+    st.header(get_text("system_statistics", current_lang))
+    if st.button(get_text("get_stats", current_lang)):
+        with st.spinner(get_text("fetching_stats", current_lang)):
+            try:
+                response = requests.get(f"{API_BASE_URL}/stats")
+                if response.status_code == 200:
+                    stats = response.json()
+                    for key, value in stats.items():
+                        if isinstance(value, list):
+                            st.subheader(key)
+                            st.write(", ".join(map(str, value)))
+                        else:
+                            st.metric(label=key, value=value)
+                else:
+                    st.error(get_text("error_fetching_stats", current_lang).format(response.json().get('error', 'Unknown error occurred')))
+            except requests.RequestException as e:
+                logger.error(f"Network error while fetching stats: {e}", exc_info=True)
+                st.error(get_text("network_error", current_lang).format(str(e)))
+
+elif choice_key == "system_health":
+    render_system_health(current_lang)
+
+elif choice_key == "system_logs":
+    render_system_logs(current_lang)
