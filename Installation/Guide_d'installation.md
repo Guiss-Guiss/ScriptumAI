@@ -48,7 +48,7 @@ curl https://ollama.ai/install.sh | sh
 
 ### Pour Windows :
 
-1. Visitez https://ollama.com/download/windows
+1. Visitez https://ollama.com/download/OllamaSetup.exe
 2. Téléchargez et exécutez le dernier installateur Windows
 
 Vérifiez l'installation :
