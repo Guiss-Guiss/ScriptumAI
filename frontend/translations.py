@@ -102,6 +102,8 @@ TRANSLATIONS = {
         "ingested_files": "Ingested files",
         "refresh_ingested_files": "Refresh ingested files list",
         "no_ingested_files": "No files ingested yet.",
+        "select_model": "Select Model",
+        "no_models_available": "No models available. Please ensure Ollama is running.",
     },
     "fr": {
         "menu": "Menu",
@@ -205,6 +207,8 @@ TRANSLATIONS = {
         "ingested_files": "Fichiers ingérés",
         "refresh_ingested_files": "Actualiser la liste des fichiers ingérés",
         "no_ingested_files": "Aucun fichier ingéré pour le moment.",
+        "select_model": "Sélectionner le modèle",
+        "no_models_available": "Aucun modèle disponible. Veuillez vous assurer qu'Ollama est en cours d'exécution.",
     },
     "es": {
         "menu": "Menú",
@@ -309,6 +313,8 @@ TRANSLATIONS = {
         "ingested_files": "Ingested files",
         "refresh_ingested_files": "Refresh ingested files list",
         "no_ingested_files": "No files ingested yet.",
+        "select_model": "Seleccionar modelo",
+        "no_models_available": "No hay modelos disponibles. Asegúrese de que Ollama esté ejecutándose.",
     }
 }
 

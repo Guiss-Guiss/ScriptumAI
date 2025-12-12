@@ -1,0 +1,31 @@
+# Uploaded files (keep placeholder)
+temp_uploads/*
+!temp_uploads/placeholder
+
+# Application logs
+rag_app.log
+
+# User preferences
+frontend/user_language.json
+frontend/ingested_files.json
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+
+# Data directories (keep structure)
+data/index/chroma/
+data/raw/*
+data/processed/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep

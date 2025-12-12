@@ -25,12 +25,12 @@ class QueryComponent:
         self.device = torch.device(EMBEDDING_DEVICE if torch.cuda.is_available() else "cpu")
         logger.info(f"Initialized QueryComponent with LLM model: {LLM_MODEL} on device: {self.device}")
 
-    def process_query(self, query: str) -> Dict[str, Any]:
+    def process_query(self, query: str, model: str = None) -> Dict[str, Any]:
         """Processes a query and retrieves relevant information."""
         try:
             logger.info(f"Processing query: {query}")
             relevant_chunks = self.retrieval_component.retrieve(query, k=TOP_K_RESULTS)
-            response = self._generate_response(query, relevant_chunks)
+            response = self._generate_response(query, relevant_chunks, model=model)
             return {
                 "query": query,
                 "response": response,
@@ -46,7 +46,7 @@ class QueryComponent:
                 "error": f"Error processing query: {str(e)}"
             }
 
-    def _generate_response(self, query: str, relevant_chunks: List[Dict[str, Any]]) -> str:
+    def _generate_response(self, query: str, relevant_chunks: List[Dict[str, Any]], model: str = None) -> str:
         """Generates a response based on retrieved relevant chunks."""
         context_parts = []
         for chunk in relevant_chunks:
@@ -81,10 +81,13 @@ class QueryComponent:
 
         logger.debug(f"Generated prompt: {prompt}")
 
+        # Use provided model or fall back to default from config
+        selected_model = model if model else LLM_MODEL
+
         try:
-            logger.info(f"Sending request to Ollama API with model: {LLM_MODEL}")
+            logger.info(f"Sending request to Ollama API with model: {selected_model}")
             response = self.ollama_client.generate(
-                model=LLM_MODEL,
+                model=selected_model,
                 prompt=prompt,
                 options={
                     "max_tokens": LLM_MAX_TOKENS,

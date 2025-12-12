@@ -4,7 +4,8 @@ import os
 import tempfile
 from werkzeug.utils import secure_filename
 from main import RAGApplication
-from config import UPLOAD_FOLDER, ALLOWED_EXTENSIONS
+from config import UPLOAD_FOLDER, ALLOWED_EXTENSIONS, OLLAMA_BASE_URL, LLM_MODEL
+import ollama
 from datetime import datetime, timedelta
 import threading
 import uuid
@@ -157,15 +158,16 @@ def process_query():
             return jsonify({"error": "No query provided"}), 400
 
         query = data['query']
-        
-        response = rag_app.query_component.process_query(query)
-        
+        model = data.get('model')  # Optional model parameter
+
+        response = rag_app.query_component.process_query(query, model=model)
+
         logger.debug(f"Query processed successfully: {response}")
         return jsonify({
             "response": response,
             "status": "success"
         })
-        
+
     except Exception as e:
         logger.error(f"Error processing query: {str(e)}", exc_info=True)
         return jsonify({"error": str(e)}), 500
@@ -215,7 +217,8 @@ def query_endpoint():
             return jsonify({"error": "No query provided"}), 400
 
         query = data['query']
-        response = rag_app.query_component.process_query(query)
+        model = data.get('model')  # Optional model parameter
+        response = rag_app.query_component.process_query(query, model=model)
 
         if response.get("error"):
             return jsonify({"error": response['error']}), 500
@@ -223,6 +226,29 @@ def query_endpoint():
         return jsonify({"response": response, "status": "success"})
     except Exception as e:
         return jsonify({"error": f"Internal server error: {str(e)}"}), 500
+
+@app.route('/api/models', methods=['GET'])
+def get_ollama_models():
+    """Fetch available Ollama models."""
+    try:
+        client = ollama.Client(host=OLLAMA_BASE_URL)
+        models_response = client.list()
+        # Handle both dict and ListResponse object types
+        if hasattr(models_response, 'models'):
+            # ListResponse object
+            models = [model.model for model in models_response.models]
+        elif isinstance(models_response, dict):
+            # Dict response
+            models = [model['name'] for model in models_response.get('models', [])]
+        else:
+            models = []
+        return jsonify({
+            "models": models,
+            "default": LLM_MODEL
+        })
+    except Exception as e:
+        logger.error(f"Error fetching Ollama models: {str(e)}", exc_info=True)
+        return jsonify({"error": str(e), "models": []}), 500
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5004, debug=False)

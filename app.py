@@ -69,18 +69,49 @@ elif choice_key == "ingest_documents":
 
 elif choice_key == "query":
     st.header(get_text("process_query", current_lang))
+
+    # Fetch available Ollama models (cached in session state)
+    if "ollama_models" not in st.session_state:
+        try:
+            models_response = requests.get(f"{API_BASE_URL}/api/models")
+            if models_response.status_code == 200:
+                models_data = models_response.json()
+                st.session_state.ollama_models = models_data.get("models", [])
+                st.session_state.default_model = models_data.get("default", "")
+            else:
+                st.session_state.ollama_models = []
+                st.session_state.default_model = ""
+        except requests.RequestException:
+            st.session_state.ollama_models = []
+            st.session_state.default_model = ""
+
+    # Model selector dropdown
+    available_models = st.session_state.ollama_models
+    if available_models:
+        default_idx = 0
+        if st.session_state.default_model in available_models:
+            default_idx = available_models.index(st.session_state.default_model)
+        selected_model = st.selectbox(
+            get_text("select_model", current_lang),
+            available_models,
+            index=default_idx
+        )
+    else:
+        st.warning(get_text("no_models_available", current_lang))
+        selected_model = None
+
     query = st.text_input(get_text("enter_query", current_lang))
     if st.button(get_text("process_query", current_lang)):
         with st.spinner(get_text("processing_query", current_lang)):
             try:
                 response = requests.post(
                     f"{API_BASE_URL}/api/query",
-                    json={"query": query},
+                    json={"query": query, "model": selected_model},
                     headers={"Content-Type": "application/json"}
                 )
                 logger.debug(f"API Response status: {response.status_code}")
                 logger.debug(f"API Response content: {response.text[:200]}...")
-                
+
                 if response.status_code == 200:
                     result = response.json()
                     render_results("query", result, current_lang)
