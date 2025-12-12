@@ -5,9 +5,6 @@ temp_uploads/*
 # Application logs
 rag_app.log
 
-# User preferences
-frontend/user_language.json
-frontend/ingested_files.json
 
 # Python
 __pycache__/
