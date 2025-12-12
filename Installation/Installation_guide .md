@@ -61,9 +61,11 @@ ollama --version
 Pull the necessary models for ScriptumAI:
 
 ```bash
-ollama pull llama3.2
-ollama pull nomic-embed-text
+ollama pull nomic-embed-text  # Required for embeddings
+ollama pull llama3.2          # Default LLM (or any model you prefer)
 ```
+
+**Note:** You can install multiple LLM models from https://ollama.com/search. ScriptumAI features a **model selector** in the Query section that lets you choose from all your installed Ollama models at runtime. The `nomic-embed-text` model is required for embeddings, but you can use any LLM for query responses.
 
 Verify models are installed:
 

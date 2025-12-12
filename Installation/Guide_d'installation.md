@@ -62,9 +62,11 @@ ollama --version
 Téléchargez les modèles nécessaires pour ScriptumAI :
 
 ```bash
-ollama pull llama3.2
-ollama pull nomic-embed-text
+ollama pull nomic-embed-text  # Requis pour les embeddings
+ollama pull llama3.2          # LLM par défaut (ou tout autre modèle de votre choix)
 ```
+
+**Note :** Vous pouvez installer plusieurs modèles LLM depuis https://ollama.com/search. ScriptumAI dispose d'un **sélecteur de modèle** dans la section Requête qui vous permet de choisir parmi tous vos modèles Ollama installés. Le modèle `nomic-embed-text` est requis pour les embeddings, mais vous pouvez utiliser n'importe quel LLM pour les réponses aux requêtes.
 
 Vérifiez que les modèles sont installés :
 
